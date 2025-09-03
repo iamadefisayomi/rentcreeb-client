@@ -1,0 +1,13 @@
+{
+    "id": "rent-house",
+    "dir": "ltr",
+    "lang": "en",
+    "categories": [
+      "business",
+      "food",
+      "housing"
+    ],
+    "prefer_related_applications": false,
+  "iarc_rating_id": "13"
+
+}
