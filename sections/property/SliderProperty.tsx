@@ -15,16 +15,22 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button';
 import currency from "currency.js";
 import { usePathname, useRouter } from "next/navigation";
-import LoveButton from "./LoveButton";
+import LoveButton from "./singleProperty/LoveButton";
+import { _properties } from "@/_data/images";
 
 
 export default async function SliderProperty ({ property, favourites }: { property: any, favourites: string[]}) {
   const router = useRouter();
-  const pathname = usePathname()
-  console.log(pathname)
+  const pathname = usePathname();
+
+  const { listedIn, type, state, city, lga, slug } = property || {};
+  const propertyUrl = (`/property/${slug}`).toLowerCase()
+
   useEffect(() => {
-    router.prefetch(`/listings/${property?._id}`);
-  }, [router, property?._id]);
+    if (propertyUrl) {
+      router.prefetch(`/${propertyUrl}`);
+    }
+  }, [router, property?._id, propertyUrl]);
 
   const handleopenProperty = () => {
 
@@ -40,7 +46,8 @@ export default async function SliderProperty ({ property, favourites }: { proper
               favourites={favourites}
             />
           }
-          images={property?.images?.map((image: string) => (typeof image === "string" ? image : "")).filter(Boolean) || []}
+          // images={property?.images?.map((image: string) => (typeof image === "string" ? image : "")).filter(Boolean) || []}
+          images={_properties.map(res => res.image).map((image: string) => (typeof image === "string" ? image : "")).filter(Boolean) || []}
         />
       </div>
 
@@ -76,7 +83,7 @@ export default async function SliderProperty ({ property, favourites }: { proper
       <div className="w-full flex items-center justify-between gap-2 px-2 py-3 border-t">
         <h3 className="text-sm font-medium">{currency(property.price, { symbol: "₦", precision: 2 }).format()} / <span className="text-[11px] text-muted-foreground">year</span></h3>
         <Button
-          onClick={() => router.push(`/listings/${property?.slug}`)}
+          onClick={() => router.push(propertyUrl)}
           size="icon"
           className="rounded-full"
         >

@@ -36,6 +36,7 @@ import {
   WATER_SUPPLY,
 } from "@/_data/_propertyDefault"
 import { propertySearchSchema, SearchPropertySchemaType } from "./formSchemas"
+import { Input } from "@/components/ui/input"
 
 // ─────────────────────────────────────────────
 // TYPES
@@ -186,6 +187,83 @@ export default function HomeFilterForm({ onClose }: { onClose?: () => void }) {
               )}
             />
           ))}
+
+          <FormField
+            control={form.control}
+            name="size"
+            render={({ field }) => (
+              <AccordionItem value="size" className="bg-slate-900 px-4">
+                <AccordionTrigger className="text-xs capitalize font-medium">
+                  Property Size
+                </AccordionTrigger>
+                <AccordionContent className="">
+                  <Input
+                    type="number"
+                    value={field.value!}
+                    onChange={field.onChange}
+                    placeholder="Enter size (sqm)"
+                    className=" bg-slate-800"
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            )}
+          />
+
+          {/* Property Age */}
+          <RadioGroupField
+            control={form.control}
+            name="age"
+            label="Property Age"
+            options={["Newly Built", "1-5 years", "5-10 years", "10+ years"]}
+          />
+
+          {/* Services */}
+          <MultiSelectField
+            control={form.control}
+            name="services"
+            label="Services"
+            options={[
+              "24/7 Security",
+              "Cleaning Service",
+              "Concierge",
+              "Waste Disposal",
+            ]}
+          />
+
+          {/* Connectivity */}
+          <MultiSelectField
+            control={form.control}
+            name="connectivity"
+            label="Connectivity"
+            options={[
+              "Fiber Internet",
+              "Mobile Coverage",
+              "Satellite TV",
+              "Smart Home Ready",
+            ]}
+          />
+
+          {/* Ownership */}
+          <RadioGroupField
+            control={form.control}
+            name="ownership"
+            label="Ownership Type"
+            options={["Freehold", "Leasehold", "Rent", "Co-tenancy"]}
+          />
+
+          {/* Proximity */}
+          <MultiSelectField
+            control={form.control}
+            name="proximity"
+            label="Proximity To"
+            options={[
+              "School",
+              "Hospital",
+              "Market",
+              "Bus Stop",
+              "Main Road",
+            ]}
+          />
 
           {/* Single-choice filters */}
           <RadioGroupField control={form.control} name="furnished" label="Furnishing" options={FURNISHED_OPTIONS} />

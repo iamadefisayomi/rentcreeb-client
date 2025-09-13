@@ -9,10 +9,10 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import Rating from "@/components/Rating";
 import Autoplay from "embla-carousel-autoplay";
 import { cn } from "@/lib/utils";
 import useResponsive from "@/hooks/useResponsive";
+import Rating from "@/components/Rating";
 
 export default function TestimonialSlider() {
   const [api, setApi] = React.useState<CarouselApi | undefined>(undefined);
@@ -62,13 +62,14 @@ export default function TestimonialSlider() {
           className="w-full"
           onMouseEnter={plugin.current.stop}
           onMouseLeave={plugin.current.reset}
+          opts={{loop: true}}
           setApi={setApi} // Set the API using the setApi function
         >
           <div className="w-full h-full flex items-center justify-center">
           <div className="absolute hidden md:flex left-0 top-0 h-full w-[35%] bg-gradient-to-r from-slate-100 via-slate-100/0 to-transparent z-10" />
           <CarouselContent>
             {_testimonials.map((testimonial, index) => (
-              <CarouselItem key={index} className={` md:pl-4 md:basis-1/3 md:flex-[0_0_50%]`}>
+              <CarouselItem key={index} className={` md:pl-4 md:basis-1/3`}>
                 <div className="p-1">
                   <Testimonial key={testimonial.id} {...testimonial} />
                 </div>
@@ -100,8 +101,8 @@ export default function TestimonialSlider() {
 const Testimonial = ({ name, role, image, feedback }: typeof _testimonials[0]) => {
   return (
     <div className="w-full p-3 md:p-6 rounded-lg flex bg-white h-64 justify-between border flex-col items-start gap-3">
-      <Rating />
-      <p className="text-muted-foreground text-[11px]">{feedback}</p>
+      <Rating fill='orange' className="text-orange-500" />
+      <p className="text-muted-foreground text-xs">{feedback}</p>
 
       <div className="w-fit mx-auto flex items-center gap-1 md:gap-2">
         <img

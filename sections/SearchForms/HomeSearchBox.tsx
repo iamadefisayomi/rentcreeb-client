@@ -141,13 +141,21 @@ export function HomeSearchBox() {
         return v !== "" && v !== null && v !== undefined;
       })
     );
+    const {listedIn, state, city, lga, type} = data
+    const propertyUrl = [
+    listedIn,
+    type,
+    state,
+    lga,
+    city,
+  ].filter(Boolean).join("/").toLowerCase();
 
     const queryString = new URLSearchParams(
       filteredQuery as Record<string, string>
     ).toString();
 
     startTransition(() => {
-      router.push(`/${form.getValues("listedIn")}?${queryString}`);
+      router.push(`/${propertyUrl}?${queryString}`);
     });
   }
 

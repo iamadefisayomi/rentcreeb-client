@@ -49,6 +49,28 @@ export const propertySearchSchema = yup.object({
     .string()
     .oneOf(["off-plan", "under construction", "ready to move"])
     .nullable(),
+
+    // ---new fields
+    size: yup
+    .number()
+    .nullable()
+    .transform((v, o) => (o === "" ? null : v)),
+
+    age: yup
+      .string()
+      .oneOf(["Newly Built", "1-5 years", "5-10 years", "10+ years"])
+      .nullable(),
+
+    services: yup.array().of(yup.string()).default([]),
+
+    connectivity: yup.array().of(yup.string()).default([]),
+
+    ownership: yup
+      .string()
+      .oneOf(["Freehold", "Leasehold", "Rent", "Co-tenancy"])
+      .nullable(),
+
+    proximity: yup.array().of(yup.string()).default([]),
 });
 
 export type SearchPropertySchemaType = yup.InferType<typeof propertySearchSchema>;

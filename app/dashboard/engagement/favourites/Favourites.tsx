@@ -9,7 +9,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { NewPropertySchemaType } from "@/sections/dashboard/formSchemas"
-import SingleProperty from "@/sections/property/singleProperty"
+import SingleProperty from "@/sections/property/singleProperty2"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import {

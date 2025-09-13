@@ -97,8 +97,9 @@ export async function createNewProperty(payload: NewPropertySchemaType) {
     const data = getKeys.data
 
     // 3. Generate slug from title
-    const baseSlug = slugify(data.title || "");
-    const slug = `${baseSlug}`;
+    const {title, listedIn, state, city, lga, type} = data
+    const propertySlug = [title, type, listedIn, city, lga, state].filter(Boolean).join(" ")
+    const slug = JSON.stringify(slugify(propertySlug));
 
     // 4. Check for duplicate listing by same user
     const existing = await Property.findOne({ userId: user.id, slug });

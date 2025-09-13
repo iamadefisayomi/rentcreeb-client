@@ -5,8 +5,8 @@ import { getProperties } from "@/actions/property";
 import LayoutWithImageHeader from "@/components/layoutWithImageHeader";
 import ExploreGallery from "@/sections/home/ExploreGallery";
 import TestimonialSlider from "@/sections/home/TestimonialSlider";
-import WhyChooseUs from "@/sections/home/WhyChooseUs";
-import SingleProperty from "@/sections/property/singleProperty";
+import OurServices from "@/sections/ourServices";
+import SingleProperty from "@/sections/property/singleProperty2";
 import { HomeSearchBox } from "@/sections/SearchForms/HomeSearchBox";
 import { PropertyDocument } from "@/server/schema/Property";
 
@@ -42,7 +42,7 @@ export default async function Index() {
         </div>
 
         <ExploreGallery />
-        <WhyChooseUs />
+        <OurServices />
         <TestimonialSlider />
       </div>
     </LayoutWithImageHeader>
