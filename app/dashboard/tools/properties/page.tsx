@@ -9,6 +9,6 @@ export const metadata: Metadata = {
   
 
 export default async function Page () {
-  const properties = (await getCurrentUserProperties()).data
-    return <MyProperty properties={properties as any}/>
+  const properties = (await getCurrentUserProperties()).data || []
+    return <MyProperty properties={properties as any[]}/>
 }

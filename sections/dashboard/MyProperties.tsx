@@ -145,14 +145,14 @@ export default function MyProperties({
               className="w-fit gap-2 border text-[11px]"
               component={
                 <div className="flex w-[100px] flex-col gap-2">
-                  {_myPropertySort.map((_sort, index) => (
+                  {Object.entries(_myPropertySort).map(([key, value], index) => (
                     <Button
                       key={index}
-                      onClick={() => handleSortChange(_sort)}
+                      onClick={() => handleSortChange(value.value)}
                       className="text-[11px] w-full capitalize"
                       variant="ghost"
                     >
-                      {_sort}
+                      {value.label}
                     </Button>
                   ))}
                 </div>
@@ -251,7 +251,7 @@ export default function MyProperties({
                         <MenubarContent className="w-[100px] min-w-[100px] p-0">
                           <MenubarItem
                             className="flex items-center gap-2 capitalize py-3 cursor-pointer font-medium text-[11px] text-muted-foreground border-b rounded-none"
-                            onClick={() => router.push(`${Routes.listing}/${pro._id}`)}
+                            onClick={() => router.push(`/property/${pro._id}`)}
                           >
                             <Eye className="w-3" /> View
                           </MenubarItem>

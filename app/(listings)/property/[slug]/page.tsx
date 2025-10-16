@@ -1,33 +1,41 @@
-import { NewPropertySchemaType } from "@/sections/dashboard/formSchemas";
 import PropertyDetails from "./PropertyDetails";
 import { getPropertyById } from "@/actions/properties";
+import { getReviews } from "@/actions/reviews";
+import { PropertyDocument } from "@/server/schema/Property";
+import { ReviewDocument } from "@/server/schema/Review";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
 // Fetch property once and reuse
-async function fetchProperty(id: string): Promise<NewPropertySchemaType | any> {
+async function fetchProperty(id: string): Promise<PropertyDocument | any> {
   try {
     const response = await getPropertyById(id);
-    return response?.data as NewPropertySchemaType;
+    return response?.data as PropertyDocument;
   } catch {
     return null;
   }
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { slug } = await params;
-  const property = await fetchProperty(slug);
+  try {
+    const { slug } = await params;
+    const property = await fetchProperty(slug);
 
-  return {
-    title:`${property?.slug} - Listings | Rent-House® - Your Trusted Home Rental Partner` || "Property Details",
-  };
+    return {
+      title: `${property?.slug || "Property Details"} - ${property?.listedIn || ""}`,
+    };
+  } catch (error) {
+    console.error("Metadata generation failed:", error);
+    return { title: "Property Details" };
+  }
 }
 
 export default async function Page({ params }: Props) {
   const { slug } = await params;
-  const property = await fetchProperty(slug);
+  const property = await fetchProperty(slug) as PropertyDocument
+  const reviews = (property?._id ? (await getReviews(property._id as any)).data : []) as ReviewDocument[]
 
-  return <PropertyDetails property={property! as NewPropertySchemaType} />;
+  return <PropertyDetails property={property! as PropertyDocument} reviews={reviews} />;
 }

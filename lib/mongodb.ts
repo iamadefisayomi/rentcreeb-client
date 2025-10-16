@@ -43,7 +43,9 @@ export async function getMongoClient() {
     // Close stale connection
     try {
       await client.close();
-    } catch (_) {}
+    } catch (err: any) {
+      return err
+    }
 
     // Create new client and connect again
     client = new MongoClient(uri, options);

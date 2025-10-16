@@ -78,7 +78,7 @@ const PageViewStyleAndSort = () => {
             aria-pressed={pageViewStyle === "grid"}
             onClick={() => setPageViewStyle("grid")}
             className={cn(
-              "px-2 py-1 rounded-sm text-muted-foreground transition-colors",
+              "px-2 py-1 rounded-sm text-muted-foreground transition-colors border-2 border-blue-100",
               pageViewStyle === "grid" && "text-primary"
             )}
             initial="inactive"
@@ -96,7 +96,7 @@ const PageViewStyleAndSort = () => {
             aria-pressed={pageViewStyle === "list"}
             onClick={() => setPageViewStyle("list")}
             className={cn(
-              "px-2 py-1 rounded-sm text-muted-foreground transition-colors",
+              "px-2 py-1 rounded-sm text-muted-foreground transition-colors border-2 border-blue-100",
               pageViewStyle === "list" && "text-primary"
             )}
             initial="inactive"

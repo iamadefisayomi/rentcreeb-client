@@ -1,6 +1,6 @@
 import { NewPropertySchemaType } from "@/sections/dashboard/formSchemas";
 import { getPropertyById } from "@/actions/properties";
-import PropertyForm from "@/sections/dashboard/PropertyForm2";
+import PropertyForm from "@/sections/dashboard/PropertyForm";
 
 type Props = {
     params: Promise<{ id: string }>;

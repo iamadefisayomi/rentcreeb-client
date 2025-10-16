@@ -67,13 +67,13 @@ const TeamCard = ({ image, role, name }: {image: string, name: string, role: str
     },
     {
       id: 2,
-      name: "Mr Kazeem",
+      name: "Kazeem",
       role: "Head of Design",
-      image: "https://firebasestorage.googleapis.com/v0/b/rent-house-a2c71.appspot.com/o/team%2FScreenshot%20(42).png?alt=media&token=be4ed3a6-49f3-4817-b62e-591ee78d4f9b",
+      image: "https://ik.imagekit.io/rentcreeb/kazeem.jpg?updatedAt=1760441997865",
     },
     {
       id: 3,
-      name: "Mr chucks",
+      name: "chucks",
       role: "Quality Assurance",
       image: "https://firebasestorage.googleapis.com/v0/b/rent-house-a2c71.appspot.com/o/team%2FScreenshot%20(41).png?alt=media&token=0b81a629-fdd3-4012-8eb4-d65945b47c55",
     },
@@ -87,7 +87,7 @@ const TeamCard = ({ image, role, name }: {image: string, name: string, role: str
       id: 5,
       name: "Abigail Ekpeyoung",
       role: "Product manager",
-      image: "https://img.freepik.com/premium-vector/cute-ghost-doodle-style-halloween-isolated-orange-background-vector-illustration_112545-3512.jpg",
+      image: "https://ik.imagekit.io/rentcreeb/abi.jpg?updatedAt=1760441998189",
     },
   ];
   

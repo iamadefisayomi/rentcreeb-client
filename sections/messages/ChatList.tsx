@@ -9,6 +9,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
 import { useSocketStore } from '@/contexts/socketStore';
+import { getCleanPath } from './_getCleanPath';
 
 // ✅ Skeleton loader for a chat item
 function ChatItemSkeleton() {
@@ -45,21 +46,26 @@ function ChatItem({
   const property = chat.propertyId;
   const chatId = chat._id;
   const lastMessage = chat.lastMessage;
+  // const pathname = getCleanPath(usePathname())
   const pathname = usePathname()
+  const url = getCleanPath(pathname)
+
+
 
   return (
-    <Link href={`${pathname}/${chatId}`} key={chatId}>
+   <Link href={`${url}/${chatId}`} key={chatId}>
       <div
         className={cn(
           "flex gap-3 items-center justify-between p-2 hover:bg-slate-100 rounded-lg cursor-pointer w-full overflow-hidden",
           (currentChatId === chatId || currentChatId === property?._id) && "bg-slate-100"
         )}
       >
-        <div className="flex-grow flex items-center gap-2">
-          <div className="relative rounded-full">
+        {/* Avatar + User Info */}
+        <div className="flex-grow flex items-center gap-2 overflow-hidden">
+          <div className="relative rounded-full shrink-0">
             <Avatar className="border-2 border-white size-14">
               <AvatarImage src={otherUser?.image || ""} className="object-cover" />
-              <AvatarFallback className="uppercase text-md font-medium ">
+              <AvatarFallback className="uppercase text-md font-medium">
                 {otherUser?.name?.slice(0, 2)}
               </AvatarFallback>
             </Avatar>
@@ -71,26 +77,28 @@ function ChatItem({
             />
           </div>
 
-          <div className="flex flex-col overflow-hidden">
-            <h4 className="text-[11px] font-medium capitalize whitespace-nowrap overflow-hidden text-ellipsis">
+          {/* Name, Property Title, Last Message */}
+          <div className="flex flex-col min-w-0"> 
+            <h4 className="text-[11px] font-medium capitalize truncate">
               {otherUser?.name}
             </h4>
             <p className="text-[10px] text-gray-600 font-semibold truncate">
-              {property?.title || ''}
+              {property?.title || ""}
             </p>
             <p className="text-[10px] text-muted-foreground truncate">
               {typingUser?.id === otherUser._id
                 ? `${typingUser?.name.split(" ")[0]} is typing...`
-                : (lastMessage?.content || 'Start chatting...')}
+                : (lastMessage?.content || "Start chatting...")}
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col items-end text-[10px] text-muted-foreground">
-          <p className="whitespace-nowrap overflow-hidden text-ellipsis">
+        {/* Time + Seen Status */}
+        <div className="flex flex-col items-end shrink-0 text-[10px] text-muted-foreground">
+          <p className="truncate max-w-[50px]">
             {dayjs(lastMessage?.createdAt || chat.createdAt).format("h:mm A")}
           </p>
-          {lastMessage?.status === 'seen' ? (
+          {lastMessage?.status === "seen" ? (
             <CheckCheck className="text-primary w-3" />
           ) : (
             <Check className="text-muted-foreground w-3" />
@@ -98,6 +106,7 @@ function ChatItem({
         </div>
       </div>
     </Link>
+
   );
 }
 

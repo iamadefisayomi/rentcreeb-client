@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Logo from "@/components/Logo";
-import { Dot, Menu, Wrench, X } from "lucide-react";
+import { Dot, LogOut, Menu, Settings, Wrench, X } from "lucide-react";
 import { navConfig } from "./navConfig";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -26,11 +26,13 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import MessageNotification from "@/components/MessageNotification";
 import { cn } from "@/lib/utils";
+import { NoUser } from "./userMenu";
 
 export default function MobileHeader() {
   const [open, setOpen] = useState(false);
   const [isSticky, setIsSticky] = useState(true);
-  const { user } = useAuth();
+  const { user, logOut } = useAuth();
+  const router = useRouter()
   const avatarFallback = user && user?.name?.slice(0, 2) || user?.email?.slice(0, 2) || "G";
 
   useEffect(() => {
@@ -136,6 +138,32 @@ export default function MobileHeader() {
             </div>
 
             <SheetFooter>
+              {
+                !user ? (
+                  <NoUser />
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <Button
+                      onClick={() => router.push(Routes.dashboard["account management"]["account information"])}
+                      variant="outline"
+                      size="sm"
+                      className="text-[11px] flex items-center gap-2"
+                    >
+                      <Settings className="w-4" />
+                      Manage Account
+                    </Button>
+                    <Button
+                      onClick={logOut}
+                      variant="outline"
+                      size="sm"
+                      className="text-[11px] flex items-center gap-2"
+                    >
+                      <LogOut className="w-4" />
+                      Sign-Out
+                    </Button>
+                  </div>
+                )
+              }
               <div className="w-full flex items-center justify-center border-t p-4 rounded-b-md mt-4">
                 <p className="text-[10px] cursor-default text-muted-foreground">
                   RentCreeb &copy; 2024 All Right Reserved.

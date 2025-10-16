@@ -3,7 +3,6 @@
 import { Bell, BellOff, X } from "lucide-react";
 import { memo } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { NotificationType, useNotificationStore } from "@/contexts/notificationStore";
 
 // Component for no notifications
 const NoNotification = memo(() => (
@@ -19,7 +18,6 @@ NoNotification.displayName = "NoNotification";
 
 export default function Notification() {
   
-  const { notifications, fetchUserLogs, removeNotification } = useNotificationStore();
 
   // useEffect(() => {
   //   if (user?.uid) {
@@ -39,11 +37,11 @@ export default function Notification() {
 
       <PopoverContent className="w-[400px] flex flex-col p-0 mr-5" sideOffset={15}>
         <div className="p-4 flex flex-col w-full">
-          {notifications.length === 0 ? (
+          {/* {notifications.length === 0 ? (
             <NoNotification />
           ) : (
             <div className="space-y-3">
-              {notifications.map((notification: NotificationType) => (
+              {{}.map((notification: NotificationType) => (
                 <div key={notification.id} className="flex items-center justify-between border hover:bg-muted duration-300 p-3 rounded-md">
 
                   <div className="flex flex-col gap-2">
@@ -59,7 +57,7 @@ export default function Notification() {
                 </div>
               ))}
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="w-full flex items-center justify-center border-t p-4 bg-muted rounded-b-md">

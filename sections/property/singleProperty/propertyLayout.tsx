@@ -23,11 +23,11 @@ import LoveButton from "./LoveButton";
 import useResponsive from "@/hooks/useResponsive";
 
 
-export default function PropertyLayout ({ property, favourites }: { property: any, favourites: string[]}) {
+export default function PropertyLayout ({ property, favourites, isGrid: defaultGrid }: { property: any, favourites: string[], isGrid?: boolean}) {
   const router = useRouter();
   const {pageViewStyle, setPageViewStyle} = usePageSettings();
   const isDesktop = useResponsive() === 'desktop'
-  const isGrid = pageViewStyle === 'grid'
+  const isGrid = defaultGrid || pageViewStyle === 'grid'
 
   const { slug } = property || {};
   const propertyUrl = (`/property/${slug}`).toLowerCase()
@@ -80,16 +80,14 @@ export default function PropertyLayout ({ property, favourites }: { property: an
                 {property?.description?.split(" ").slice(0, 25).join(" ") + (property?.description?.split(" ").length > 30 ? "..." : "")}
             </p>
 
-            <div className={cn("w-full flex items-center gap-2", isGrid && "px-3 pb-2 grid grid-cols-4 gap-2")}>
+            <div className={cn("w-full flex items-center gap-2", isGrid && "px-3 pb-2 grid grid-cols-3 gap-2")}>
                 <span className="flex items-center gap-2 justify-center text-[11px] border border-blue-200 font-medium  rounded-xl px-3 py-1 capitalize text-slate-900">
                     <BedDouble className="w-4 text-primary" /> {property.bedrooms} Beds
                 </span>
                 <span className="flex items-center gap-2 justify-center border border-blue-200  rounded-xl px-3 py-1 text-[11px] font-medium capitalize text-slate-900">
                     <Bath className="w-4 text-primary" /> {property.bathrooms} Baths
                 </span>
-                <span className="flex items-center gap-2 justify-center border border-blue-200 rounded-xl px-3 py-1 text-[11px] font-medium lowercase text-slate-900">
-                    <Ratio className="w-4 text-primary" /> 8x10 m<sup className="-ml-2">2</sup>
-                </span>
+                
                 <span className="flex items-center gap-2 justify-center border border-blue-200 rounded-xl px-3 py-1 text-[11px] font-medium capitalize text-slate-900">
                     <CarFront className="w-4 text-primary" />{property.parking} parks
                 </span>

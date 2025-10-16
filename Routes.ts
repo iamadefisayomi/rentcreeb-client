@@ -7,7 +7,7 @@ const Routes = {
   // Static pages
   aboutUs: '/about',
   contact: '/contact',
-  services: '/services',
+  services: '/services?status=coming-soon',
   faq: '/faq',
   blog: '/blog?status=coming-soon',
   careers: '/careers?status=coming-soon',
@@ -15,7 +15,6 @@ const Routes = {
   privacy: '/privacy',
 
   // Listings
-  listings: '/listings',
   buy: '/for-sale',
   rent: '/for-rent',
   shortLet: '/short-let?status=coming-soon',
@@ -27,6 +26,8 @@ const Routes = {
   agents: '/agents?status=coming-soon',
   mortgage: '/mortgage?status=coming-soon',
   calculator: '/mortgage/calculator?status=coming-soon',
+  map: "/map",
+  gallery: '/gallery',
 
   // Dashboard
   dashboard: {

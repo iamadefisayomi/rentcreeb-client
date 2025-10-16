@@ -4,6 +4,7 @@ import React, { memo, useMemo, ReactNode } from "react";
 import Logo from "@/components/Logo";
 import { Facebook, Twitter, Instagram, Linkedin, Phone, MapPin, Mail } from "lucide-react";
 import Link from "next/link";
+import Routes from "@/Routes";
 
 type Menu = {
   header: string;
@@ -49,31 +50,31 @@ const footerListMenu: Menu[] = [
   {
     header: "company",
     list: [
-      { label: "about", url: "/about" },
-      { label: "blog", url: "/blog" },
-      { label: "location map", url: "/map" },
-      { label: "faq", url: "/faq" },
-      { label: "contact us", url: "/contact" },
+      { label: "about", url: Routes.aboutUs },
+      { label: "blog", url: Routes.blog },
+      { label: "location map", url: Routes.map },
+      { label: "faq", url: Routes.faq },
+      { label: "contact us", url: Routes.contact },
     ],
   },
   {
     header: "services",
     list: [
-      { label: "meet our agents", url: "/agents" },
-      { label: "properties", url: "/listings" },
-      { label: "houses", url: "/listings" },
-      { label: "gallery", url: "/gallery" },
-      { label: "legal assistance", url: "/terms" },
+      { label: "meet our agents", url: Routes.agents },
+      { label: "properties", url: `${Routes.rent}` },
+      { label: "houses", url: `${Routes.rent}?type=house` },
+      { label: "gallery", url: Routes.gallery },
+      { label: "legal assistance", url: Routes.terms },
     ],
   },
   {
     header: "popular search",
     list: [
-      { label: "apartment low to high", url: "/agents" },
-      { label: "property for rent", url: "/listings" },
-      { label: "featured properties", url: "/listings" },
-      { label: "office", url: "/office-space" },
-      { label: "new properties", url: "/terms" },
+      { label: "apartment low to high", url: Routes.agents },
+      { label: "property for rent", url: `${Routes.rent}?listedIn=rent` },
+      { label: "featured properties", url: `${Routes.rent}?listedIn=rent` },
+      { label: "office", url: `${Routes.rent}?listedIn=rent,type=office` },
+      { label: "new properties", url: `${Routes.rent}?listedIn=rent` },
     ],
   },
 ];

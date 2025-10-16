@@ -17,5 +17,5 @@ export async function errorMessage(
   return payload;
 }
 
-export const NEXT_PUBLIC_BASE_URL = isDev ? 'http://localhost:3000' : 'https://rent-pro-virid.vercel.app'
+export const NEXT_PUBLIC_BASE_URL = isDev ? 'http://localhost:3000' : 'https://www.rentcreeb.com'
 export const RENDER_SERVER_API = isDev ? 'http://localhost:4000' : 'https://rentcreeb-server.onrender.com'

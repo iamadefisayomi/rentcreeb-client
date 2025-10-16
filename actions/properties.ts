@@ -5,7 +5,7 @@ import { errorMessage } from "@/constants";
 import { newPropertyKeys, NewPropertySchemaType } from "@/sections/dashboard/formSchemas";
 import { extractAllowedKeys } from "@/utils/extractAllowedKeys";
 import { getCurrentUser } from "./auth";
-import { uploadManyToBunny } from "./bunny";
+import { uploadManyImages } from "./imagekit";
 import { revalidatePath } from "next/cache";
 import Routes from "@/Routes";
 import _ from "lodash";
@@ -22,6 +22,7 @@ export async function updateProperty(
   payload: Partial<NewPropertySchemaType>
 ) {
   try {
+    await dbConnection()
     if (!propertyId || typeof propertyId !== 'string') {
       throw new Error('Invalid property ID');
     }
@@ -49,7 +50,7 @@ export async function updateProperty(
       const existingUrls = data.images.filter((img: any): img is string => typeof img === 'string');
 
       if (newFiles.length > 0) {
-        const res = await uploadManyToBunny(newFiles);
+        const res = await uploadManyImages(newFiles);
         if (!res.success && res?.message) throw new Error(res.message || 'Image upload failed');
         const newUrls = res.data?.map((i: any) => i.url).filter(Boolean) ?? [];
         updatedImages = [...existingUrls, ...newUrls];
@@ -87,6 +88,7 @@ export async function updateProperty(
 
 export async function createNewProperty(payload: NewPropertySchemaType) {
   try {
+    await dbConnection()
     // 1. Authenticate user
     const { data: user, message, success } = await getCurrentUser();
     if (!success || !user) throw new Error(message || "Unauthorized");
@@ -110,7 +112,7 @@ export async function createNewProperty(payload: NewPropertySchemaType) {
     // 5. Upload property images
     let uploadedImages: string[] = [];
     if (data.images && data.images.length > 0) {
-      const result = await uploadManyToBunny(data.images as File[]);
+      const result = await uploadManyImages(data.images as File[]);
       uploadedImages = result.data?.map((img: any) => img.url).filter(Boolean) ?? [];
 
       if (uploadedImages.length === 0) {
@@ -149,6 +151,7 @@ export async function createNewProperty(payload: NewPropertySchemaType) {
   
   export async function getPropertyById(propertyId: string) {
     try {
+      await dbConnection()
       const idFilter = Types.ObjectId.isValid(propertyId) ? { _id: new Types.ObjectId(propertyId) } : null;
 
       const prop = await Property.findOne({
@@ -167,6 +170,7 @@ export async function createNewProperty(payload: NewPropertySchemaType) {
 
 export async function getPropertyByUserId(userId: string) {
     try {
+      await dbConnection()
       const properties = await Property.find({userId}).lean()
   
       return { success: true, data: properties };
@@ -192,10 +196,9 @@ export async function getPropertyByUserId(userId: string) {
   }
   
   
-  
-
 export async function deleteProperty(propertyId: string) {
     try {
+      await dbConnection()
       if (!propertyId || typeof propertyId !== 'string') {
         throw new Error('Invalid property ID');
       }

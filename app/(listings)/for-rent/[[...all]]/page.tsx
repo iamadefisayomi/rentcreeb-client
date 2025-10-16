@@ -19,7 +19,6 @@ export default async function ForRent ({ searchParams }: ListingsProps) {
 
   return (
       <Fragment>
-
           {
           latestProperties && latestProperties.length > 0 && (
             latestProperties.map((property: any, index: number) => (

@@ -1,4 +1,3 @@
-import { getNotifications } from "@/actions/notification";
 import { NotificationType } from "@/sections/dashboard/formSchemas";
 import Notifications from "@/sections/dashboard/notifications";
 import { Metadata } from "next";
@@ -10,6 +9,6 @@ export const metadata: Metadata = {
   
 
 export default async function Page () {
-    const notify = (await getNotifications()).data as NotificationType
+    const notify = {} as NotificationType
     return <Notifications title="alerts & notifications" notify={notify}/>
 }

@@ -1,17 +1,14 @@
-// src/actions/messages.ts
 'use server';
 
 import { dbConnection } from '@/lib/dbConnection';
 import Message from '@/server/schema/Message';
 import Property from '@/server/schema/Property';
-import '@/server/schema/User'; // Ensure all refs load properly
+import '@/server/schema/User';
 import '@/server/schema/Chat';
-import '@/server/schema/Property';
 import { Types } from 'mongoose';
 import { getCurrentUser } from './auth';
 import Chat from '@/server/schema/Chat';
 import mongoose from 'mongoose';
-
 
 export async function sendMessage({
   chatId,
@@ -25,19 +22,25 @@ export async function sendMessage({
   await dbConnection();
 
   const { message, success, data: user } = await getCurrentUser();
-  if (!success || !user?.id) throw new Error(message || 'Unauthorized request.');
+  if (!success) throw new Error(message);
+  if (!user) throw new Error('Login to continue')
 
   const senderId = user.id;
-
   if (!chatId) throw new Error('Missing chatId.');
 
   let chat = await Chat.findById(chatId);
 
-  // 🧠 Create chat if it doesn't exist but a property with the same ID does
+  // 🧠 If chat doesn't exist, try to create one using propertyId
   if (!chat) {
-    const propertyExist = await Property.exists({ _id: chatId });
-    if (propertyExist) {
+    const property = await Property.findById(chatId);
+    if (property) {
+      if (property.userId.toString() === senderId) {
+        throw new Error("You cannot send messages to yourself about your own property.");
+      }
       chat = await createChat(chatId, senderId);
+
+      // Re-fetch as document (in case createChat returns lean object)
+      chat = await Chat.findById(chat._id);
     } else {
       throw new Error('Chat or property does not exist.');
     }
@@ -47,10 +50,17 @@ export async function sendMessage({
   const receiverId = chat.participants.find(
     (id: Types.ObjectId) => id.toString() !== senderId
   );
-  if (!receiverId) throw new Error('Receiver not found');
+
+  if (!receiverId) {
+    throw new Error('Receiver not found');
+  }
+
+  if (receiverId.toString() === senderId) {
+    throw new Error("You cannot send messages to yourself.");
+  }
 
   // 🧠 Create the message
-  const cleanContent = await removePhoneNumbers(content)
+  const cleanContent = await removePhoneNumbers(content);
   const messageDoc = await Message.create({
     chatId: chat._id,
     sender: senderId,
@@ -59,15 +69,14 @@ export async function sendMessage({
     messageType,
   });
 
-  // 🧠 Populate the saved message to include sender/receiver snapshot
+  // 🧠 Populate sender/receiver
   const populatedMessage = await Message.findById(messageDoc._id)
     .populate('sender', '_id name image')
     .populate('receiver', '_id name image')
     .lean();
 
-  // 🧠 Update chat with latest message
-  chat.lastMessage = messageDoc._id;
-  await chat.save();
+  // 🧠 Update chat with latest message (using updateOne avoids .save issues)
+  await Chat.updateOne({ _id: chat._id }, { $set: { lastMessage: messageDoc._id } });
 
   return {
     message: populatedMessage,
@@ -84,11 +93,15 @@ export async function createChat(propertyId: string, senderId: string) {
   if (!property) throw new Error("Property not found");
 
   const propertyOwnerId = property.userId.toString();
-  if (senderId === propertyOwnerId)
-    throw new Error("You cannot message yourself about your own property");
 
+  // 🚫 Prevent self-chat
+  if (senderId === propertyOwnerId) {
+    throw new Error("You cannot message yourself about your own property");
+  }
+
+  // 🧠 Check if chat already exists
   const existingChat = await Chat.findOne({
-    propertyId: new mongoose.Types.ObjectId(propertyId), // ensure correct type
+    propertyId: new mongoose.Types.ObjectId(propertyId),
     participants: {
       $all: [
         new mongoose.Types.ObjectId(senderId),
@@ -99,14 +112,15 @@ export async function createChat(propertyId: string, senderId: string) {
 
   if (existingChat) return existingChat;
 
+  // 🧠 Create a new chat
   const newChat = await Chat.create({
     propId: propertyId,
-    propertyId: propertyId,
-    participants: [senderId, propertyOwnerId ],
+    propertyId,
+    participants: [senderId, propertyOwnerId],
   });
 
-
-  return JSON.parse(JSON.stringify(newChat));
+  // ✅ Return the fresh chat with participants
+  return await Chat.findById(newChat._id).lean();
 }
 
 /**

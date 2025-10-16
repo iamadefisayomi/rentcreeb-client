@@ -3,7 +3,6 @@
 import { generatePropertyDescription } from "@/actions/ai"
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -17,7 +16,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react"
 
 
-export default function GenerateDescription ({description, property, className, setDescription}: {description: string, property?: string, className?: string, setDescription?: any}) {
+export default function GenerateDescription ({description, property, className, setDescription}: {description: string, property?: any, className?: string, setDescription?: any}) {
+  const [prompt, setPrompt] = useState(description || `Generate standard description ${property?.title ? ` this ${property.title}` : 'this property'}`)
   const [text, setText] = useState("")
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
@@ -25,7 +25,7 @@ export default function GenerateDescription ({description, property, className, 
   const handleGetDescription = async () => {
     setLoading(true)
     try {
-      const {success, message, data} = await generatePropertyDescription({description, property})
+      const {success, message, data} = await generatePropertyDescription({description: prompt, property})
       if (!success && message) throw new Error(message)
         // 
       setText(data)
@@ -53,16 +53,15 @@ export default function GenerateDescription ({description, property, className, 
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xs font-medium">
-            Let our AI generate a standard description for you.
+            Let our AI generate a standard Property description that converts for you.
           </AlertDialogTitle>
           
           <AlertDialogDescription>
             <p className="text-[10px] text-muted-foreground lowercase">Write a prompt</p>
             <Textarea 
-              defaultValue={description || ''}
               disabled={loading}
-              value={text || description || ''}
-              onChange={(e) => setText(e.target.value)}
+              value={text || prompt}
+              onChange={(e) => setPrompt(e.target.value)}
               rows={8}
             />
           </AlertDialogDescription>

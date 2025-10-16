@@ -27,6 +27,7 @@ import dynamic from "next/dynamic"
 import { NEXT_PUBLIC_BASE_URL } from "@/constants"
 import { createNewProperty, updateProperty } from "@/actions/properties"
 import { useParams } from "next/navigation"
+import GenerateDescription from "./GenerateDescription"
 const AddPropertyMap = dynamic(() => import('@/components/AddPropertyMap'), { ssr: false });
 
 
@@ -214,7 +215,10 @@ export default function PropertyForm ({type, defaultValues}: {type: 'new' | 'edi
                         name="description"
                         render={({ field }) => (
                             <FormItem className="w-full">
-                                <FormLabel className="">Description*</FormLabel>
+                                <FormLabel className="flex items-center gap-3 mb-1">
+                                    Description*
+                                    <GenerateDescription description={field.value} property={form.watch()} setDescription={field.onChange} />
+                                </FormLabel>
                                 <FormControl >
                                     <div className="w-full items-end flex flex-col gap-2">
                                     <Textarea rows={10}  placeholder="Type your description..." {...field} />

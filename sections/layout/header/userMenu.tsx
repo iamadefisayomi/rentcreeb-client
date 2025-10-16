@@ -12,7 +12,7 @@ import useResponsive from "@/hooks/useResponsive";
 import { useAuth } from "@/hooks/useAuth";
 
 // NoUser component for unauthenticated state
-const NoUser = memo(() => (
+export const NoUser = memo(() => (
   <div className='flex items-center gap-2'>
     <Link href={Routes.login}>
       <Button variant='outline' size='sm' className="md:w-fit w-full">Sign In</Button>

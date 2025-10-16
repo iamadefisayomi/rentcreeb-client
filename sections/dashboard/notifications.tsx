@@ -18,7 +18,6 @@ import {
 import { useEffect, useState } from "react"
 import useAlert from "@/hooks/useAlert"
 import { isEqual } from "lodash-es";
-import { updateNotifications } from "@/actions/notification";
 
 
 
@@ -66,14 +65,14 @@ export default function Notifications ({notify, title}: {notify: NotificationTyp
 
     // ---
     async function onSubmit(data: yup.InferType<typeof notificationsSchema>) {
-            if (dataChanged) {
-                const { success, message} = await updateNotifications(data)
-                if (!success && message) {
-                    setAlert(message, 'error')
-                }
-                else setAlert('Updated successfuly', 'success')
-                return setDataChanged(false)
-            }
+            // if (dataChanged) {
+            //     const { success, message} = await updateNotifications(data)
+            //     if (!success && message) {
+            //         setAlert(message, 'error')
+            //     }
+            //     else setAlert('Updated successfuly', 'success')
+            //     return setDataChanged(false)
+            // }
       }
 
     //

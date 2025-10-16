@@ -175,11 +175,11 @@ useEffect(() => {
                   </AvatarFallback>
                 </Avatar>
 
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 max-w-[90%] md:max-w-[65%]">
                   {msg.content && (
                     <p
                       className={cn(
-                        "py-2 px-3 bg-slate-100 text-[11px] text-gray-800 rounded-lg animate-fadeIn",
+                        "py-2 px-3 bg-slate-100 text-[11px] text-gray-800 rounded-lg  animate-fadeIn",
                         msg.sender?._id === userId ? "rounded-tr-none" : "rounded-tl-none"
                       )}
                     >

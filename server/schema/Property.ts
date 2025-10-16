@@ -20,6 +20,10 @@ export interface PropertyDocument extends Omit<NewPropertySchemaType, 'location'
   approvedAt?: Date;
   isDeleted?: boolean;
   isAvailable?: boolean;
+
+  // computed
+  averageRating?: number;
+  reviewCount?: number;
 }
 
 const PropertySchema = new Schema<PropertyDocument>(
@@ -34,14 +38,14 @@ const PropertySchema = new Schema<PropertyDocument>(
 
     // Pricing & Features
     price: { type: Number, required: true },
-    taxRate: { type: Number, default: 0, nullable: true },
+    taxRate: { type: Number, default: 0 },
 
     bedrooms: { type: Number, default: 1, required: true },
     bathrooms: { type: Number, default: 1, required: true },
     kitchens: { type: Number, default: 1, required: true },
     parking: { type: Number, default: 1, required: true },
 
-    // New Property Detail Fields
+    // Extra Details
     yearBuilt: { type: Number, default: null },
     floorArea: { type: Number, default: null },
     landArea: { type: Number, default: null },
@@ -65,10 +69,9 @@ const PropertySchema = new Schema<PropertyDocument>(
     // Utilities & Amenities
     waterSupply: { type: String, default: null },
     electricity: { type: String, default: null },
-    internet: { type: String, default: null },
-    gasSupply: { type: Boolean, default: null },
-    elevator: { type: Boolean, default: null },
-    swimmingPool: { type: Boolean, default: null },
+    // gasSupply: { type: Boolean, default: null },
+    // elevator: { type: Boolean, default: null },
+    // swimmingPool: { type: Boolean, default: null },
 
     // Media
     videoLink: { type: String, default: null },
@@ -82,9 +85,9 @@ const PropertySchema = new Schema<PropertyDocument>(
       },
     },
     floorPlan: { type: [String], default: [] },
-    virtualTourLink: { type: String, default: null },
+    // virtualTourLink: { type: String, default: null },
     brochure: { type: String, default: null },
-    coverImageIndex: { type: Number, default: null },
+    // coverImageIndex: { type: Number, default: null },
 
     // Feature Categories
     general: { type: [String], default: [] },
@@ -122,18 +125,21 @@ const PropertySchema = new Schema<PropertyDocument>(
     isApproved: { type: Boolean, default: false },
     approvedAt: { type: Date, default: null },
     isDeleted: { type: Boolean, default: false },
+
+    // Computed fields (kept in sync by Review hooks)
+    averageRating: { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
+// Indexes
 PropertySchema.index({ location: '2dsphere' });
 
+// Query middleware (exclude soft-deleted)
 PropertySchema.pre<Query<PropertyDocument, PropertyDocument>>(/^find/, function () {
   this.where({ isDeleted: false });
 });
-
 PropertySchema.pre('aggregate', function () {
   const pipeline = this.pipeline();
   const first = pipeline[0];
@@ -144,6 +150,14 @@ PropertySchema.pre('aggregate', function () {
   }
 });
 
+// Virtual relation to reviews
+PropertySchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'propertyId',
+  localField: '_id',
+});
+
 PropertySchema.set('toObject', { virtuals: true, versionKey: false });
+PropertySchema.set('toJSON', { virtuals: true, versionKey: false });
 
 export default models.Property || model<PropertyDocument>('Property', PropertySchema);

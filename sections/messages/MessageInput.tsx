@@ -10,6 +10,7 @@ import { Mic, Paperclip, Send, Smile } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import { Input } from "@/components/ui/input";
 import debounce from "lodash/debounce";
+import { Button } from "@/components/ui/button";
 
 const MessageInput = ({
   onSend,
@@ -66,15 +67,15 @@ const MessageInput = ({
       />
 
       <span className="flex justify-evenly gap-3 w-full md:w-fit">
-        <button type="button">
+        {/* <button type="button">
           <Paperclip className="w-4 text-gray-600" />
         </button>
         <button type="button">
           <Mic className="w-4 text-gray-600" />
-        </button>
-        <button type="submit">
-          <Send className="w-4 text-gray-600" />
-        </button>
+        </button> */}
+        <Button size='icon' className="aspect-square rounded-full" type="submit">
+          <Send className="w-4" /> 
+        </Button>
       </span>
     </form>
   );

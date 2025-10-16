@@ -9,7 +9,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { NewPropertySchemaType } from "@/sections/dashboard/formSchemas"
-import SingleProperty from "@/sections/property/singleProperty2"
+import SingleProperty from "@/sections/property/singleProperty"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import {
@@ -103,14 +103,14 @@ export default function Favourites({
                 className="w-fit gap-2 border text-[11px]"
                 component={
                   <div className="flex w-[100px] flex-col gap-2">
-                    {_myPropertySort.map((_sort, index) => (
+                    {Object.entries(_myPropertySort).map(([key, value], index) => (
                       <Button
                         key={index}
-                        onClick={() => handleSortChange(_sort)}
+                        onClick={() => handleSortChange(value.value)}
                         className="text-[11px] w-full capitalize"
                         variant="ghost"
                       >
-                        {_sort}
+                        {value.label}
                       </Button>
                     ))}
                   </div>
@@ -137,7 +137,7 @@ export default function Favourites({
                   <TableRow key={index}>
                     <TableCell
                       className="flex items-start gap-2 cursor-pointer"
-                      onClick={() => router.push(`/listings/${pro?._id}`)}
+                      onClick={() => router.push(`/property/${pro?._id}`)}
                     >
                       <Image
                         src={(pro.images[0] as string) || ""}

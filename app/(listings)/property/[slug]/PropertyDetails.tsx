@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ArrowRight, Bath, BedDouble, CarFront, MapPin, Ratio } from "lucide-react";
+import { Bath, BedDouble, CarFront, MapPin,  Ratio } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import TestimonialSlider from "@/sections/home/TestimonialSlider";
-import { NewPropertySchemaType } from "@/sections/dashboard/formSchemas";
 import {
   type CarouselApi,
 } from "@/components/ui/carousel"
@@ -13,9 +11,13 @@ import { useRouter } from "next/navigation";
 import MultiImageSlider from "@/components/multiImageSlider";
 import { _properties } from "@/_data/images";
 import BaseLayout from "@/sections/layout";
+import Reviews from "@/sections/reviews";
+import StartMessageAndBookInspection from "@/sections/messages/StartMessageAndBookInspection";
+import { PropertyDocument } from "@/server/schema/Property";
+import { ReviewDocument } from "@/server/schema/Review";
 
 
-export default async function PropertyDetails({ property }: {property: NewPropertySchemaType}) {
+export default async function PropertyDetails({ property, reviews }: {property: PropertyDocument, reviews: ReviewDocument[]}) {
   return (
     <BaseLayout>
       <div className="w-full mx-auto flex flex-col px-2">
@@ -24,7 +26,7 @@ export default async function PropertyDetails({ property }: {property: NewProper
             backgroundImage: `url(${_properties[0]?.image as string })`,
             backgroundSize: "cover",
             backgroundPosition: "center",
-            borderRadius: "16px", // Optional: Rounds the edges
+            borderRadius: "16px",
           }}
         >
 
@@ -39,13 +41,15 @@ export default async function PropertyDetails({ property }: {property: NewProper
         </div>
 
         <ImageInformation property={property} />
-        <TestimonialSlider />
+        {/* <TestimonialSlider /> */}
+        <Reviews propertyId={property._id as any} reviews={reviews as any} />
+        {/* <FeaturedProperty property={property as any} /> */}
       </div>
     </BaseLayout>
   );
 }
 
-const ImageInformation = ({ property }: { property: NewPropertySchemaType }) => {
+const ImageInformation = ({ property }: { property: PropertyDocument }) => {
 
   const router = useRouter()
   const [lat, lon] = (() => {
@@ -96,8 +100,9 @@ const ImageInformation = ({ property }: { property: NewPropertySchemaType }) => 
       <div className="w-full max-w-lg flex flex-col items-start gap-4">
         <Button 
           onClick={() => router.push(`/map?lat=${lat}&lon=${lon}`)} 
-          className="flex items-center gap-2">
-          <MapPin className="w-4" />
+          variant='ghost'
+          className="flex items-center gap-2 border-none bg-slate-200">
+          <MapPin className="w-4 text-primary" />
           {property?.address ?? "Address not available"}
         </Button>
         <h1 className="text-2xl capitalize font-bold text-slate-800 text-start">
@@ -107,19 +112,17 @@ const ImageInformation = ({ property }: { property: NewPropertySchemaType }) => 
           {property?.description ?? "No description available"}
         </p>
 
-        <div className="w-full flex md:items-center justify-between flex-col md:flex-row items-start gap-4">
-          <h3 className="text-xl font-medium">
-            {currency(property.price, { symbol: "₦", precision: 2 }).format()} <span className="text-[11px] text-muted-foreground">/year</span>
-          </h3>
-          <Button variant="outline" className="flex items-center gap-2 capitalize w-full md:w-fit">
-            Explore Residence
-            <ArrowRight className="w-4" />
-          </Button>
-        </div>
+        <h3 className="text-2xl font-semibold">
+          {currency(property.price, { symbol: "₦", precision: 2 }).format()} <span className="text-[11px] text-muted-foreground">/year</span>
+        </h3>
+
+        <StartMessageAndBookInspection
+          propertyId={property?._id as any}
+        />
       </div>
 
       <MultiImageSlider
-        // images={property.images || []} 
+        // images={property.images || []}
         images={_properties.map(res => res.image).map((image: string) => (typeof image === "string" ? image : "")).filter(Boolean) || []}
         limit={6} 
       />

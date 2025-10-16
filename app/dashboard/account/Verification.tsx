@@ -130,7 +130,7 @@ export const TrustScore = ({userScore}: {userScore: any}) => {
         <div className="w-full flex items-start flex-col gap-10 bg-white p-6 rounded-[4px] border">
             <h2 className="text-sm font-semibold capitalize">your trust score</h2>
 
-            <div className="w-full grid grid-cols-5 gap-2">
+            <div className="w-full md:grid md:grid-cols-5 flex flex-col gap-2">
                 <span className="col-span-2"><CircularProgress label='trust score' progress={trustScore || 0} size={200} strokeWidth={10} /></span>
 
                 <div className="w-full gap-4 flex flex-col col-span-3">

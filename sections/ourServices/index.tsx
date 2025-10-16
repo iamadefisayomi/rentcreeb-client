@@ -30,7 +30,6 @@ export default function OurServices () {
   );
 }
 
-
 const ServiceItem = ({ title, details, icon, index }: OurServiceProps & { index: number }) => {
   const [hovered, setHovered] = useState(false);
   const BorderRadius = useMemo(() => generateRandomRadius(), []);

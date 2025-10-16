@@ -1,9 +1,10 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { generateRandomRadius } from "@/utils/generateRandomBorder"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 
 type ImagesProps = {
@@ -31,83 +32,97 @@ export default function RandomImagesGallery ({images}: ImagesProps) {
 }
 
 const Gallery = ({ images }: ImagesProps) => {
-    const [loading, setLoading] = useState(true);
-    return (
-       <div className="w-full h-full rounded-xl grid grid-cols-3 grid-rows-2 gap-2 md:gap-4">
-            <div className="grid grid-rows-2 row-span-2 gap-2 md:gap-4">
-                <div className="rounded-xl overflow-hidden">
-                    <Image
-                        src={images[0]}
-                        alt={`Image 0`}
-                        width={300}
-                        height={300}
-                        className={`w-full h-full rounded-lg object-cover hover:scale-105 duration-300 ${
-                            loading ? "opacity-70" : "opacity-100"
-                        }`}
-                        loading="lazy"
-                        unoptimized
-                        onLoad={() => setLoading(false)}
-                    />
-                </div>
-                <div className="rounded-xl overflow-hidden">
-                    <Image
-                        src={images[1]}
-                        alt={`Image 1`}
-                        width={300}
-                        height={300}
-                        className={`w-full h-full rounded-lg object-cover hover:scale-105 duration-300 ${
-                            loading ? "opacity-70" : "opacity-100"
-                        }`}
-                        loading="lazy"
-                        unoptimized
-                        onLoad={() => setLoading(false)}
-                    />
-                </div>
-            </div>
-            <div className="grid row-span-2 overflow-hidden rounded-xl">
-                <Image
-                    src={images[2]}
-                    alt={`Image 2`}
-                    width={300}
-                    height={300}
-                    className={`w-full h-full rounded-lg object-cover hover:scale-105 duration-300 ${
-                        loading ? "opacity-70" : "opacity-100"
-                    }`}
-                    loading="lazy"
-                    unoptimized
-                    onLoad={() => setLoading(false)}
-                />
-            </div>
-            <div className="grid grid-rows-2 row-span-2 gap-2 md:gap-4">
-                <div className="rounded-xl overflow-hidden">
-                    <Image
-                        src={images[3]}
-                        alt={`Image 3`}
-                        width={300}
-                        height={300}
-                        className={`w-full h-full rounded-lg object-cover hover:scale-105 duration-300 ${
-                            loading ? "opacity-70" : "opacity-100"
-                        }`}
-                        loading="lazy"
-                        unoptimized
-                        onLoad={() => setLoading(false)}
-                    />
-                </div>
-                <div className="rounded-xl overflow-hidden">
-                    <Image
-                        src={images[4]}
-                        alt={`Image 4`}
-                        width={300}
-                        height={300}
-                        className={`w-full h-full rounded-lg object-cover hover:scale-105 duration-300 ${
-                            loading ? "opacity-70" : "opacity-100"
-                        }`}
-                        loading="lazy"
-                        unoptimized
-                        onLoad={() => setLoading(false)}
-                    />
-                </div>
-            </div>
-       </div>
-    );
-  };
+  const [loading, setLoading] = useState(true);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  // Generate random radius for each image once
+  const borderRadii = useMemo(
+    () => images.map(() => generateRandomRadius()),
+    [images]
+  );
+
+  return (
+    <div className="w-full h-full rounded-xl grid grid-cols-3 grid-rows-2 gap-2 md:gap-4">
+      {/* Left Column */}
+      <div className="grid grid-rows-2 row-span-2 gap-2 md:gap-4">
+        {[0, 1].map((i) => (
+          <div
+            key={i}
+            className="rounded-xl overflow-hidden duration-500 ease-in-out"
+            onMouseEnter={() => setHoveredIndex(i)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            style={{
+              borderRadius:
+                hoveredIndex === i ? borderRadii[i] : undefined,
+            }}
+          >
+            <Image
+              src={images[i]}
+              alt={`Image ${i}`}
+              width={300}
+              height={300}
+              className={`w-full h-full rounded-3xl object-cover hover:scale-105 duration-300 ${
+                loading ? "opacity-70" : "opacity-100"
+              }`}
+              loading="lazy"
+              unoptimized
+              onLoad={() => setLoading(false)}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Middle Column */}
+      <div
+        className="grid row-span-2 overflow-hidden rounded-xl duration-500 ease-in-out"
+        onMouseEnter={() => setHoveredIndex(2)}
+        onMouseLeave={() => setHoveredIndex(null)}
+        style={{
+          borderRadius: hoveredIndex === 2 ? borderRadii[2] : undefined,
+        }}
+      >
+        <Image
+          src={images[2]}
+          alt="Image 2"
+          width={300}
+          height={300}
+          className={`w-full h-full rounded-3xl object-cover hover:scale-105 duration-300 ${
+            loading ? "opacity-70" : "opacity-100"
+          }`}
+          loading="lazy"
+          unoptimized
+          onLoad={() => setLoading(false)}
+        />
+      </div>
+
+      {/* Right Column */}
+      <div className="grid grid-rows-2 row-span-2 gap-2 md:gap-4">
+        {[3, 4].map((i) => (
+          <div
+            key={i}
+            className="rounded-xl overflow-hidden duration-500 ease-in-out"
+            onMouseEnter={() => setHoveredIndex(i)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            style={{
+              borderRadius:
+                hoveredIndex === i ? borderRadii[i] : undefined,
+            }}
+          >
+            <Image
+              src={images[i]}
+              alt={`Image ${i}`}
+              width={300}
+              height={300}
+              className={`w-full h-full rounded-3xl object-cover hover:scale-105 duration-300 ${
+                loading ? "opacity-70" : "opacity-100"
+              }`}
+              loading="lazy"
+              unoptimized
+              onLoad={() => setLoading(false)}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};

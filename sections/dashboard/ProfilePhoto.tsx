@@ -9,14 +9,11 @@ import {Loader2} from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useAuth } from "@/hooks/useAuth";
-import { deleteImageFromBunny, uploadSingleFile } from "@/actions/bunny";
+import { deleteSingleImage, uploadSingleImage } from "@/actions/imagekit";
 import { authClient } from "@/auth-client";
 
 
@@ -32,7 +29,7 @@ export default function ImageUploader() {
       if (!image.success && image.message) throw new Error(image.message)
         // 
       setUploading(true)
-      const {message, success, data} = await uploadSingleFile(image.data as File)
+      const {message, success, data} = await uploadSingleImage(image.data as File)
       if (!success && message) throw new Error(message)
         //
       const {data: res, error} = await authClient.updateUser({
@@ -54,7 +51,7 @@ export default function ImageUploader() {
   const handleDelete = async () => {
     try {
       setUploading(true)
-      const {message, success} = await deleteImageFromBunny(user?.image as string)
+      const {message, success} = await deleteSingleImage(user?.image as string)
       if (!success) throw new Error(message)
       // 
       const {data: res, error} = await authClient.updateUser({
