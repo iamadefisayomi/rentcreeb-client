@@ -1,9 +1,8 @@
 
 import { _properties } from "@/_data/images";
 import {getRandomPropertyImages } from "@/actions/properties";
-import { getProperties } from "@/actions/property";
+import { getProperties } from "@/actions/properties";
 import LayoutWithImageHeader from "@/components/layoutWithImageHeader";
-import usePageSettings from "@/contexts/usePageSettings";
 import ExploreGallery from "@/sections/home/ExploreGallery";
 import TestimonialSlider from "@/sections/home/TestimonialSlider";
 import OurServices from "@/sections/ourServices";

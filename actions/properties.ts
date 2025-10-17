@@ -15,6 +15,8 @@ import { Types } from 'mongoose';
 import type { PipelineStage, SortOrder } from 'mongoose';
 import { dbConnection } from "@/lib/dbConnection";
 import { _properties } from "@/_data/images";
+import { SearchPropertySchemaType } from "@/sections/SearchForms/formSchemas";
+import { _myPropertySort } from "@/_data/_propertyDefault";
 
 
 export async function updateProperty(
@@ -335,150 +337,251 @@ export async function findSimilarProperties({
 
 // ---------------------------------------------
 
-
-
-
-const parseString = (value: string | string[] | undefined): string | undefined =>
-  Array.isArray(value) ? value[0] : value;
-
-const parseNumber = (value: string | string[] | undefined): number | undefined => {
-  const parsed = parseFloat(parseString(value) || '');
-  return isNaN(parsed) ? undefined : parsed;
-};
-
-const parseBoolean = (value: string | string[] | undefined): boolean | undefined => {
-  const str = parseString(value);
-  if (str === 'true') return true;
-  if (str === 'false') return false;
-  return undefined;
-};
-
-const parseArray = (value: string | string[] | undefined): string[] | undefined => {
-  if (!value) return undefined;
-  if (Array.isArray(value)) return value;
-  return value.split(',').map((v) => v.trim());
-};
-
-type GetPropertyProps = {
-    forcedLimit?: number;
-    query?: Record<string, string | string[]>;
-}
-
-// 
-// Utility to build sort safely
 type SortInput =
   | string
   | { [key: string]: SortOrder | { $meta: any } }
   | [string, SortOrder][];
 
+// ✅ Dynamic sort builder
 function buildSort(
   sortBy?: string,
   order: SortOrder = -1,
   hasSearch?: boolean
 ): SortInput {
-  if (hasSearch) {
-    // For text search, always prioritize textScore
-    return { score: { $meta: "textScore" } };
-  }
-  if (!sortBy) return { createdAt: -1 }; // default
+  if (hasSearch) return { score: { $meta: "textScore" } }; // text search priority
+  if (!sortBy) return { createdAt: -1 }; // default: newest first
   return { [sortBy]: order };
 }
 
-export async function getProperties({ query = {}, forcedLimit }: GetPropertyProps) {
-  try {
-    await dbConnection();
+// ✅ Main property fetcher
+export async function getProperties({
+  filters = {} as SearchPropertySchemaType,
+  limit = 20,
+  sortBy,
+  order = -1,
+  search,
+}: {
+  filters?: SearchPropertySchemaType;
+  limit?: number;
+  sortBy?: string;
+  order?: SortOrder;
+  search?: string;
+}) {
+  await dbConnection();
 
-    const filters: Record<string, any> = {};
-    const {
-      type,
-      listedIn,
-      state,
-      city,
-      lga,
-      search,
-      min,
-      max,
-      bedrooms,
-      bathrooms,
-      garages,
-      parkings,
-      amenities,
-      security,
-      page: qPage,
-      limit: qLimit,
-      sort: qSort,
-      order: qOrder,
-    } = query;
+  const query: any = {};
+  const hasSearch = !!search;
 
-    // Core filters
-    if (parseString(type) && type !== "all" ) filters.type = parseString(type);
-    if (parseString(listedIn) && listedIn !== "all") filters.listedIn = parseString(listedIn);
-    if (parseString(state)) filters.state = { $regex: parseString(state), $options: "i" };
-    if (parseString(city)) filters.city = { $regex: parseString(city), $options: "i" };
-    if (parseString(lga)) filters.lga = { $regex: parseString(lga), $options: "i" };
+  // 🧠 Text search
+  if (hasSearch) query.$text = { $search: search };
 
-    // Ranges
-    const minPrice = parseNumber(min);
-    const maxPrice = parseNumber(max);
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      filters.price = {};
-      if (minPrice !== undefined) filters.price.$gte = minPrice;
-      if (maxPrice !== undefined) filters.price.$lte = maxPrice;
-    }
-    if (parseNumber(bedrooms) !== undefined) filters.bedrooms = { $gte: parseNumber(bedrooms) };
-    if (parseNumber(bathrooms) !== undefined) filters.bathrooms = { $gte: parseNumber(bathrooms) };
-    if (parseNumber(garages) !== undefined || parseNumber(parkings) !== undefined) {
-      filters.parking = { $gte: parseNumber(garages) ?? parseNumber(parkings) };
-    }
-
-    // Arrays
-    const amenityArr = parseArray(amenities);
-    if (amenityArr?.length) {
-      filters.$or = [
-        { general: { $in: amenityArr } },
-        { indoor: { $in: amenityArr } },
-        { outdoor: { $in: amenityArr } },
-        { climate: { $in: amenityArr } },
-      ];
-    }
-    const securityArr = parseArray(security);
-    if (securityArr?.length) filters.special = { $in: securityArr };
-
-    // Full-text search (requires text index on title/description)
-    const searchTerm = parseString(search);
-    if (searchTerm) {
-      filters.$text = { $search: searchTerm };
-    }
-
-    // Pagination + sorting
-    const page = parseNumber(qPage) || 1;
-    const limit = forcedLimit || parseNumber(qLimit) || 12;
-    const skip = (page - 1) * limit;
-
-    const sort = buildSort(
-      parseString(qSort) || "createdAt",
-      (parseString(qOrder) as SortOrder) || -1,
-      !!searchTerm
-    );
-
-    // Query
-    const [properties, total] = await Promise.all([
-      Property.find(filters, searchTerm ? { score: { $meta: "textScore" } } : {})
-        .sort(sort)
-        .skip(skip)
-        .limit(limit),
-      Property.countDocuments(filters),
-    ]);
-
-    return {
-      success: true,
-      data: properties,
-      pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
-    };
-  } catch (err: any) {
-    return errorMessage(err.message);
+  // 🏷️ Core filters
+  const filterFields = ["type", "listedIn", "state", "lga", "city"] as const;
+  for (const key of filterFields) {
+    if (filters[key]) query[key] = filters[key];
   }
+
+  // 💰 Price range
+  if (filters.min || filters.max) {
+    query.price = {
+      ...(filters.min && { $gte: filters.min }),
+      ...(filters.max && { $lte: filters.max }),
+    };
+  }
+
+  // 🧱 Amenities & security
+  if (filters.amenities?.length) query.amenities = { $all: filters.amenities };
+  if (filters.security?.length) query.security = { $all: filters.security };
+
+  // 🛏️ Numeric features
+  const numericFilters = ["bedrooms", "bathrooms", "garages", "parkings"] as const;
+  for (const key of numericFilters) {
+    if (filters[key]) query[key] = { $gte: filters[key] };
+  }
+
+  // 📍 Geo filter (5km radius)
+  if (filters.location?.coordinates?.length === 2) {
+    query.location = {
+      $near: {
+        $geometry: {
+          type: "Point",
+          coordinates: filters.location.coordinates,
+        },
+        $maxDistance: 5000,
+      },
+    };
+  }
+
+  // 🧮 Determine sort logic
+  const sortOption =
+    _myPropertySort[sortBy as keyof typeof _myPropertySort]?.sort ||
+    buildSort(sortBy, order, hasSearch);
+
+  // 🚀 Main query (random fallback)
+  let properties;
+  if (Object.keys(query).length === 0 && !hasSearch) {
+    properties = await Property.aggregate([{ $sample: { size: limit } }]);
+  } else {
+    properties = await Property.find(query)
+      .sort(sortOption as any)
+      .limit(limit)
+      .lean();
+  }
+
+  if (!properties.length) {
+    const fallback = await Property.aggregate([{ $sample: { size: limit } }]);
+    return { properties: fallback, recommended: [], similarProperties: [] };
+  }
+
+  const base = properties[0];
+
+  // 🔍 Recommended
+  const recQuery = {
+    _id: { $ne: base._id },
+    $or: [
+      { type: base.type },
+      { state: base.state },
+      { city: base.city },
+      { amenities: { $in: base.amenities || [] } },
+    ],
+  };
+
+  // 📍 Similar (geo + price + type)
+  const simQuery =
+    base.location?.coordinates?.length === 2
+      ? {
+          _id: { $ne: base._id },
+          type: base.type,
+          price: { $gte: base.price * 0.8, $lte: base.price * 1.2 },
+          location: {
+            $near: {
+              $geometry: { type: "Point", coordinates: base.location.coordinates },
+              $maxDistance: 8000,
+            },
+          },
+        }
+      : null;
+
+  const [recommended, similarProperties] = await Promise.all([
+    Property.find(recQuery).limit(10).lean().catch(() => []),
+    simQuery ? Property.find(simQuery).limit(10).lean().catch(() => []) : [],
+  ]);
+
+  // 🧩 Fallback randoms
+  const [finalRecommended, finalSimilar] = await Promise.all([
+    recommended.length
+      ? recommended
+      : Property.aggregate([
+          { $match: { _id: { $ne: base._id } } },
+          { $sample: { size: 10 } },
+        ]),
+    similarProperties.length
+      ? similarProperties
+      : Property.aggregate([
+          { $match: { _id: { $ne: base._id } } },
+          { $sample: { size: 10 } },
+        ]),
+  ]);
+
+  return { properties, recommended: finalRecommended, similarProperties: finalSimilar };
 }
+
+
+// export async function getProperties({ query = {}, forcedLimit }: GetPropertyProps) {
+//   try {
+//     await dbConnection();
+
+//     const filters: Record<string, any> = {};
+//     const {
+//       type,
+//       listedIn,
+//       state,
+//       city,
+//       lga,
+//       search,
+//       min,
+//       max,
+//       bedrooms,
+//       bathrooms,
+//       garages,
+//       parkings,
+//       amenities,
+//       security,
+//       page: qPage,
+//       limit: qLimit,
+//       sort: qSort,
+//       order: qOrder,
+//     } = query;
+
+//     // Core filters
+//     if (parseString(type) && type !== "all" ) filters.type = parseString(type);
+//     if (parseString(listedIn) && listedIn !== "all") filters.listedIn = parseString(listedIn);
+//     if (parseString(state)) filters.state = { $regex: parseString(state), $options: "i" };
+//     if (parseString(city)) filters.city = { $regex: parseString(city), $options: "i" };
+//     if (parseString(lga)) filters.lga = { $regex: parseString(lga), $options: "i" };
+
+//     // Ranges
+//     const minPrice = parseNumber(min);
+//     const maxPrice = parseNumber(max);
+//     if (minPrice !== undefined || maxPrice !== undefined) {
+//       filters.price = {};
+//       if (minPrice !== undefined) filters.price.$gte = minPrice;
+//       if (maxPrice !== undefined) filters.price.$lte = maxPrice;
+//     }
+//     if (parseNumber(bedrooms) !== undefined) filters.bedrooms = { $gte: parseNumber(bedrooms) };
+//     if (parseNumber(bathrooms) !== undefined) filters.bathrooms = { $gte: parseNumber(bathrooms) };
+//     if (parseNumber(garages) !== undefined || parseNumber(parkings) !== undefined) {
+//       filters.parking = { $gte: parseNumber(garages) ?? parseNumber(parkings) };
+//     }
+
+//     // Arrays
+//     const amenityArr = parseArray(amenities);
+//     if (amenityArr?.length) {
+//       filters.$or = [
+//         { general: { $in: amenityArr } },
+//         { indoor: { $in: amenityArr } },
+//         { outdoor: { $in: amenityArr } },
+//         { climate: { $in: amenityArr } },
+//       ];
+//     }
+//     const securityArr = parseArray(security);
+//     if (securityArr?.length) filters.special = { $in: securityArr };
+
+//     // Full-text search (requires text index on title/description)
+//     const searchTerm = parseString(search);
+//     if (searchTerm) {
+//       filters.$text = { $search: searchTerm };
+//     }
+
+//     // Pagination + sorting
+//     const page = parseNumber(qPage) || 1;
+//     const limit = forcedLimit || parseNumber(qLimit) || 12;
+//     const skip = (page - 1) * limit;
+
+//     const sort = buildSort(
+//       parseString(qSort) || "createdAt",
+//       (parseString(qOrder) as SortOrder) || -1,
+//       !!searchTerm
+//     );
+
+//     // Query
+//     const [properties, total] = await Promise.all([
+//       Property.find(filters, searchTerm ? { score: { $meta: "textScore" } } : {})
+//         .sort(sort)
+//         .skip(skip)
+//         .limit(limit),
+//       Property.countDocuments(filters),
+//     ]);
+
+//     return {
+//       success: true,
+//       data: properties,
+//       pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
+//     };
+//   } catch (err: any) {
+//     return errorMessage(err.message);
+//   }
+// }
 
 // Get random property images
 export async function getRandomPropertyImages(limit = 5) {

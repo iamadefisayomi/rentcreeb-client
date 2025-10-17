@@ -1,18 +1,19 @@
 "use client";
 
 import { _myPropertySort } from "@/_data/_propertyDefault";
-import DropDownComp from "@/components/DropdownComp";
 import LayoutWithImageHeader from "@/components/layoutWithImageHeader";
 import { ShowToolTip } from "@/components/showTooTip";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import PropertyNotFound from "@/sections/listings/propertyNotFound";
 import HomeFilterForm from "@/sections/SearchForms/HomeFilterForm";
 import { HomeSearchBox } from "@/sections/SearchForms/HomeSearchBox";
-import { Grid2X2, List, ListFilterPlus } from "lucide-react";
+import { Grid2X2, List } from "lucide-react";
 import { ReactNode } from "react";
 import { motion } from "framer-motion";
 import usePageSettings from "@/contexts/usePageSettings";
+import SortProperties from "./SortPropertyDropdown";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useState, useEffect, useTransition } from "react";
 
 export default function ListingsLayout({
   children,
@@ -63,14 +64,33 @@ export default function ListingsLayout({
 
 const PageViewStyleAndSort = () => {
   const { pageViewStyle, setPageViewStyle } = usePageSettings();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  // ✅ Get current sort from URL or default
+  const defaultSort = searchParams.get("sortBy") || "newest";
+  const [sortBy, setSortBy] = useState(defaultSort);
+
+  // ✅ Update URL query whenever sort changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("sortBy", sortBy);
+
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`);
+    });
+  }, [sortBy]);
 
   const buttonVariants = {
     inactive: { scale: 1, backgroundColor: "rgba(0,0,0,0)" },
-    active: { scale: 1.05, backgroundColor: "rgba(59,130,246,0.1)" }, // bg-blue-100
+    active: { scale: 1.05, backgroundColor: "rgba(59,130,246,0.1)" },
   };
 
   return (
     <div className="w-full grid gap-2 grid-cols-2">
+      {/* View Style Buttons */}
       <div className="flex items-center gap-4 py-3">
         <ShowToolTip title="Grid view">
           <motion.button
@@ -109,24 +129,12 @@ const PageViewStyleAndSort = () => {
         </ShowToolTip>
       </div>
 
+      {/* Sort Dropdown */}
       <div className="flex items-center justify-end">
-        <DropDownComp
-          title={"sort"}
-          icon={<ListFilterPlus className="w-4 text-primary" />}
-          component={
-            <div className="w-full flex flex-col gap-2">
-              {Object.entries(_myPropertySort).map(([key, value], index) => (
-                <Button
-                  className="text-muted-foreground capitalize text-[11px]"
-                  variant="ghost"
-                  key={index}
-                >
-                  {value.label}
-                </Button>
-              ))}
-            </div>
-          }
-          className="w-[150px]"
+        <SortProperties
+          currentSort={sortBy}
+          onSortChange={setSortBy}
+          isPending={isPending}
         />
       </div>
     </div>

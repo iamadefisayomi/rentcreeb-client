@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { Loader2, X } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -88,6 +88,7 @@ export default function HomeFilterForm({ onClose }: { onClose?: () => void }) {
   // submit handler
   const router = useRouter()
   const [isPending, startTransition] = useTransition();
+  const pathname = usePathname()
   
   async function onSubmit(data: SearchPropertySchemaType) {
     const filteredQuery = Object.fromEntries(
@@ -107,7 +108,7 @@ export default function HomeFilterForm({ onClose }: { onClose?: () => void }) {
     ).toString();
 
     startTransition(() => {
-      router.push(`/${form.getValues("listedIn")}?${queryString}`);
+      router.push(`${pathname}?${queryString}`);
     });
   }
 
@@ -118,15 +119,17 @@ export default function HomeFilterForm({ onClose }: { onClose?: () => void }) {
   const firstRender = useRef(true);
 
   useEffect(() => {
+    // Skip initial mount
     if (firstRender.current) {
       firstRender.current = false;
       return;
     }
 
+    // Only submit when form values actually differ from saved filters
     if (!isEqual(debouncedValues, savedFilters)) {
       onSubmit(debouncedValues);
     }
-  }, [debouncedValues, savedFilters]);
+  }, [debouncedValues]); // ← no need to include savedFilters here
 
   return (
     <Form {...form}>
