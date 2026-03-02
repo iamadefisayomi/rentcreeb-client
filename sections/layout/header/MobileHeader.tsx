@@ -1,5 +1,7 @@
 "use client";
 
+
+
 import { useEffect, useState } from "react";
 import Logo from "@/components/Logo";
 import { Dot, LogOut, Menu, Settings, Wrench, X } from "lucide-react";
@@ -166,7 +168,7 @@ export default function MobileHeader() {
               }
               <div className="w-full flex items-center justify-center border-t p-4 rounded-b-md mt-4">
                 <p className="text-[10px] cursor-default text-muted-foreground">
-                  RentCreeb &copy; 2024 All Right Reserved.
+                  RentCreeb &copy; 2025 All Right Reserved.
                 </p>
               </div>
             </SheetFooter>
@@ -196,7 +198,7 @@ export function DashboardNav({ setOpen }: { setOpen: Function }) {
       </div>
 
       {Object.entries(Routes.dashboard).map(([section, items], index) => {
-        if (section === "professional tools" && user?.role !== "agent")
+        if (section === "professional tools" && user?.accountType !== "agent")
           return null;
         return (
           <div key={index} className="w-full">

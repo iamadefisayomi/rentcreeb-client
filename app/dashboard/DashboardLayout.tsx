@@ -70,8 +70,8 @@ export default function DashboardLayout({children}: {children: ReactNode}) {
                 </p>
               </div>
 
-              {user?.role && <span className="absolute rounded-full h-6 flex items-center justify-center w-6  -bottom-1 left-0 border-2 border-slate-50 text-[11px] font-medium capitalize bg-black text-white">
-                {user?.role.split("").at(0)}
+              {user?.accountType && <span className="absolute rounded-full h-6 flex items-center justify-center w-6  -bottom-1 left-0 border-2 border-slate-50 text-[11px] font-medium capitalize bg-black text-white">
+                {user?.accountType.split("").at(0)}
                 </span>}
             </div>
 
@@ -79,7 +79,7 @@ export default function DashboardLayout({children}: {children: ReactNode}) {
               <Navigation
                 activeDiv={activeDiv}
                 setActiveDiv={setActiveDiv}
-                role={user?.role ?? null}
+                role={user?.accountType ?? null}
               />
 
               {
@@ -95,8 +95,6 @@ export default function DashboardLayout({children}: {children: ReactNode}) {
                 )
               }
 
-              
-              
             </div>
           </div>
         </div>

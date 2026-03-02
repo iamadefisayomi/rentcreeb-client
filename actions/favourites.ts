@@ -1,11 +1,15 @@
 'use server';
 
-import Favourite from '@/server/schema/Favourite';
+import Favourite, { IFavourite } from '@/server/schema/Favourite';
 import { getCurrentUser } from './auth';
 import { revalidatePath } from 'next/cache';
 import Routes from '@/Routes';
-import Property from '@/server/schema/Property';
+import Property, { PropertyDocument } from '@/server/schema/Property';
 
+
+type LeanProperty = Omit<PropertyDocument, "userId"> & {
+  userId: string; // or object if you populate it
+};
 
 export async function addToFavourites(propertyId: string) {
   try {
@@ -18,7 +22,7 @@ export async function addToFavourites(propertyId: string) {
       throw new Error(message || 'Not authenticated');
     }
 
-    const property = await Property.findById(propertyId);
+    const property = await Property.findById(propertyId).lean<LeanProperty>();
     if (!property || property.userId.toString() === user.id) {
       throw new Error('You cannot favourite your property!');
     }
@@ -88,7 +92,7 @@ export async function getUserFavourites() {
         model: 'Property',
         options: { lean: true }, // use lean to get plain JS objects
         select: '-someBufferField', // exclude buffers if any
-      });
+      }).lean<IFavourite>();
 
     return {
       success: true,

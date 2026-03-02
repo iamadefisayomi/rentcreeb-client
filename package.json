@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.8.0",
@@ -75,18 +75,18 @@
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.2",
     "motion": "^12.23.12",
-    "next": "^15.4.2-canary.10",
+    "next": "16.0.7",
     "next-auth": "^5.0.0-beta.25",
     "next-cloudinary": "^6.16.0",
     "nodemailer": "^6.10.0",
     "pigeon-maps": "^0.22.1",
-    "react": "^19.0.0",
+    "react": "19.2.1",
     "react-animated-heart": "^0.0.8",
     "react-auto-translate": "^0.0.6",
     "react-autosuggest": "^10.1.0",
     "react-confetti": "^6.4.0",
     "react-country-state-city": "^1.1.12",
-    "react-dom": "^19.0.0",
+    "react-dom": "19.2.1",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.5.2",
@@ -94,6 +94,8 @@
     "react-leaflet": "^5.0.0",
     "react-map-gl": "^8.0.1",
     "react-number-format": "^5.4.4",
+    "react-typed": "^2.0.12",
+    "react-typing-effect": "^2.0.5",
     "react-window": "^1.8.11",
     "recharts": "^3.1.2",
     "sharp": "^0.33.5",
@@ -105,13 +107,13 @@
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
+    "typewriter-effect": "^2.22.0",
     "use-debounce": "^10.0.5",
     "yup": "^1.6.1",
     "zod": "^3.24.2",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/formidable": "^3.4.5",
     "@types/google-map-react": "^2.1.10",
@@ -122,15 +124,20 @@
     "@types/lodash.isequal": "^4.5.8",
     "@types/node": "^20",
     "@types/nodemailer": "^6.4.17",
-    "@types/react": "^19",
+    "@types/react": "19.2.7",
     "@types/react-autosuggest": "^10.1.11",
-    "@types/react-dom": "^19",
+    "@types/react-dom": "19.2.3",
+    "@types/react-typing-effect": "^2.0.7",
     "@types/shortid": "^2.2.0",
     "eslint": "^9",
-    "eslint-config-next": "15.2.1",
+    "eslint-config-next": "16.0.7",
     "firebase-functions-test": "^3.1.0",
     "gtx-cli": "^1.2.20",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3"
   }
 }

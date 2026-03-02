@@ -38,7 +38,6 @@ export default function BreadcrumbHeader({ className }: { className?: string }) 
       <BreadcrumbList className={`text-xs capitalize ${className}`}>
         {crumbs.map((crumb, index) => (
           <BreadcrumbItem key={index} className="flex">
-            {/* Last breadcrumb is inactive */}
             <span
               onClick={index === crumbs.length - 1 ? undefined : () => router.push(`/${crumbs.slice(1, index + 1).map((c) => c.label.toLowerCase()).join("/")}`)}
               className={cn("cursor-pointer text-inherit", index == crumbs.length - 1 ? "text-muted cursor-default" : "hover:underline")}

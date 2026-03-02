@@ -1,5 +1,6 @@
+import { getUserFavourites } from "@/actions/favourites";
 import { getProperties } from "@/actions/properties";
-import SingleProperty from "@/sections/property/singleProperty";
+import ClientListProperties from "@/sections/property/clientListProperties";
 import { SearchPropertySchemaType } from "@/sections/SearchForms/formSchemas";
 import { Fragment } from "react";
 
@@ -26,18 +27,7 @@ export default async function ShortLet ({ searchParams }: ListingsProps) {
     filters: cleanedQuery as any,
     sortBy,
   });
-
-  return (
-    <Fragment>
-      {properties && properties.length > 0 ? (
-        properties.map((property: any, index: number) => (
-          <SingleProperty property={property} key={index} />
-        ))
-      ) : (
-        <div className="text-center py-20 text-gray-500">
-          No properties found matching your filters.
-        </div>
-      )}
-    </Fragment>
-  );
+  const favs = await (await getUserFavourites()).data
+  
+  return <ClientListProperties initialProperties={properties} filters={cleanedQuery} sortBy={sortBy} favs={favs} />;
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { errorMessage } from "@/constants";
+import { errorMessage, NEXT_PUBLIC_BASE_URL } from "@/constants";
 import { getCurrentUser } from "./auth";
 import { paystackAxios } from "@/utils/paystackAxios";
 import { revalidatePath } from "next/cache";
@@ -12,12 +12,13 @@ export async function getCurrentUserSubscription () {
     try {
         const { data: user, message, success } = await getCurrentUser();
         if (!success) throw new Error(message);
-        // 
+        //
         const subscriptions = await (await paystackAxios.get(`/subscription`)).data
         if (!subscriptions.status) throw new Error(subscriptions.message)
-        // 
+        //
         const currentUserSubscription = subscriptions.data
             ?.find((res: any) => res.customer?.email === user.email)
+
         
         return ({
             success: true,
@@ -51,7 +52,7 @@ export async function initSubTransaction ({plan, amount}: {plan: string, amount:
         plan,
         email: user.email,
         amount,
-        callback_url: "http://localhost:3000/api/paystack",
+        callback_url: `${NEXT_PUBLIC_BASE_URL}/api/paystack`,
         };
         const initTransaction = (
         await paystackAxios.post(`/transaction/initialize`, payload)

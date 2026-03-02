@@ -1,8 +1,9 @@
+import { _listedIn } from "@/_data/_propertyDefault";
 import * as yup from "yup";
 
 export const propertySearchSchema = yup.object({
   type: yup.string().nullable(),
-  listedIn: yup.string().nullable(),
+  listedIn: yup.string().nullable().default(_listedIn.rent),
   state: yup.string().trim().nullable(),
   lga: yup.string().trim().nullable(),
   city: yup.string().trim().nullable(),

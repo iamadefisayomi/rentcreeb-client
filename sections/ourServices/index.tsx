@@ -52,9 +52,9 @@ const ServiceItem = ({ title, details, icon, index }: OurServiceProps & { index:
                    duration-500 ease-in-out"
         style={{ borderRadius: !hovered ? BorderRadius : "" }}
       />
-      <div className="w-full flex flex-col gap-4 px-6 py-8 relative z-10">
+      <div className="w-full flex flex-col gap-4 px-6 py-8 relative z-10 ">
         <span>{icon}</span>
-        <h2 className="text-sm font-semibold group-hover:text-white">{title}</h2>
+        <h2 className="text-sm font-semibold group-hover:text-white mt-4">{title}</h2>
         <p className="text-xs text-muted-foreground group-hover:text-white">
           {details}
         </p>

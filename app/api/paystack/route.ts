@@ -1,3 +1,4 @@
+import { NEXT_PUBLIC_BASE_URL } from "@/constants";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -5,7 +6,7 @@ export async function GET(req: NextRequest) {
   const { verifySubTransaction } = await import("@/actions/subscription");
   const Routes = (await import("@/Routes")).default || (await import("@/Routes"));
   // optional to guard environment var
-  const base = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
+  const base = NEXT_PUBLIC_BASE_URL;
   const planPath = Routes.dashboard["professional tools"]["my plan"].replace(/^\//, "");
 
   // now the rest remains

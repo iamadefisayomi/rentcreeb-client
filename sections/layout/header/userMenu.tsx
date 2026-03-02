@@ -85,7 +85,7 @@ const UserMenu = memo(() => {
           </div>
         </div>
         <div className="w-full flex items-center justify-center border-t p-4 bg-muted rounded-b-md">
-          <p className="text-[10px] text-muted-foreground">RentCreeb &copy; 2024 All Rights Reserved.</p>
+          <p className="text-[10px] text-muted-foreground">RentCreeb &copy; 2025 All Rights Reserved.</p>
         </div>
       </PopoverContent>
     </Popover>

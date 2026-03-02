@@ -26,7 +26,6 @@ import { usePathname } from "next/navigation"
 
 
 
-
 export default function AccountInformation ({title, user}: {title: string, user: BetterAuthUser}) {
 
     const {refetchUser } = useAuth()

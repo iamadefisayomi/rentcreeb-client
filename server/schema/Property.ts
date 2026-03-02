@@ -1,7 +1,7 @@
 import { Query, Schema, Types, model, models } from 'mongoose';
 import { NewPropertySchemaType } from '@/sections/dashboard/formSchemas';
 
-export interface PropertyDocument extends Omit<NewPropertySchemaType, 'location'> {
+export interface PropertyDocument extends Omit<NewPropertySchemaType, 'location' | 'paymentFrequency'> {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -24,6 +24,7 @@ export interface PropertyDocument extends Omit<NewPropertySchemaType, 'location'
   // computed
   averageRating?: number;
   reviewCount?: number;
+  paymentFrequency?: 'yearly' | 'quarterly' | 'monthly' | null;
 }
 
 const PropertySchema = new Schema<PropertyDocument>(
@@ -35,6 +36,14 @@ const PropertySchema = new Schema<PropertyDocument>(
     type: { type: String, required: true },
     listedIn: { type: String, required: true },
     status: { type: String, required: true },
+    paymentFrequency: {
+      type: String,
+      enum: ['yearly', 'quarterly', 'monthly'],
+      default: null,
+      required: function (this: PropertyDocument) {
+        return this.listedIn?.toLowerCase() === 'rent';
+      },
+    },
 
     // Pricing & Features
     price: { type: Number, required: true },
@@ -132,9 +141,6 @@ const PropertySchema = new Schema<PropertyDocument>(
   },
   { timestamps: true }
 );
-
-// Indexes
-PropertySchema.index({ location: '2dsphere' });
 
 // Query middleware (exclude soft-deleted)
 PropertySchema.pre<Query<PropertyDocument, PropertyDocument>>(/^find/, function () {

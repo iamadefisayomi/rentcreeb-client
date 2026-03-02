@@ -12,9 +12,10 @@ interface CustomLayoutProps {
   component?: ReactNode;
   showCrumbs?: boolean;
   className?: string;
+  subTitle?: string;
 }
 
-export default function LayoutWithImageHeader({ title, children, bgImage, component, showCrumbs=true, className }: CustomLayoutProps) {
+export default function LayoutWithImageHeader({ title, children, bgImage, component, showCrumbs=true, className, subTitle }: CustomLayoutProps) {
   return (
     <BaseLayout>
       <div className="w-full h-full min-h-screen flex flex-col">

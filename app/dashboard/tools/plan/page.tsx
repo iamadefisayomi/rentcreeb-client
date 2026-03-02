@@ -18,10 +18,10 @@ export default async function Page() {
 
   try {
     const { data } = await paystackAxios.get("/plan");
+    if (!data.status) throw new Error(data.message)
+    
     const plans = data?.data || [];
-    activePlans = plans.filter(
-      (plan: any) => !plan.is_deleted && !plan.is_archived
-    );
+    activePlans = plans.filter( (plan: any) => !plan.is_deleted && !plan.is_archived );
   } catch (err: any) {
     console.error("⚠️ Paystack fetch failed during build:", err.message);
   }

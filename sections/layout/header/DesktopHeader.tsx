@@ -25,7 +25,7 @@ export default function DesktopHeader() {
   const {user} = useAuth()
   
   return (
-    <header className="w-full min-h-16 shadow-sm z-[50] bg-background/50 backdrop-blur-md flex items-center justify-center sticky top-0 left-0">
+    <header className="w-full min-h-16 shadow-md z-[50] bg-background/50 backdrop-blur-md flex items-center justify-center sticky top-0 left-0">
       <div className="w-full max-w-8xl grid items-center grid-cols-5 gap-2 px-2 py-3">
         <Logo />
         <div className="flex items-center justify-center col-span-3">

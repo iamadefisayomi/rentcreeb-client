@@ -11,8 +11,10 @@ const Routes = {
   faq: '/faq',
   blog: '/blog?status=coming-soon',
   careers: '/careers?status=coming-soon',
+  inspection: '/careers?status=coming-soon',
   terms: '/terms',
   privacy: '/privacy',
+  legal: '/legal-assistance',
 
   // Listings
   buy: '/for-sale',

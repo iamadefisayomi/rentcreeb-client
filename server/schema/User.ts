@@ -8,6 +8,7 @@ const UserSchema = new Schema(
     username: { type: String, unique: true },
     image: String,
     emailVerified: Boolean,
+    accountType: String
   },
   {
     timestamps: true,

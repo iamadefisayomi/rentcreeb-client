@@ -13,21 +13,24 @@ import { Button } from "@/components/ui/button";
 import useAlert from "@/hooks/useAlert";
 import { Headphones, UserRound } from "lucide-react";
 import { authClient } from "@/auth-client";
+import { useRouter } from "next/navigation";
 
-export default function SetClaims() {
+export default function SetAccountType () {
 
     const [accType, setAcctype] = useState('');
     const [updating, setUpdating] = useState(false);
     const { setAlert } = useAlert();
+    const router = useRouter()
 
-    const handleSetrole = async () => {
+    const handleSetAccountType = async () => {
         if (accType === 'renter' || accType === 'agent') {
             try {
                 setUpdating(true);
                 const {data, error} = await authClient.updateUser({
-                    role: accType
+                    accountType: accType
                 })
                 if (error) throw new Error(error.message)
+                return router.refresh()
             }
             catch(err: any) {
                 return setAlert(err.message, 'error')
@@ -54,7 +57,7 @@ export default function SetClaims() {
                     </ToggleGroupItem>
                 </ToggleGroup>
 
-                <Button loading={updating} className="w-full" size='lg' onClick={handleSetrole} >
+                <Button loading={updating} className="w-full" size='lg' onClick={handleSetAccountType} >
                     Continue {accType && <>as <span className="lowercase pl-2">{accType}</span></>}
                 </Button>
             </AlertDialogContent>

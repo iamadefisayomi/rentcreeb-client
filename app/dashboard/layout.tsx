@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import DashboardLayout from "./DashboardLayout";
 import PageTransition from "@/components/PageTransition";
 import { getCurrentUser } from "@/actions/auth";
-import SetClaims from "@/sections/dashboard/SetClaims";
+import SetAccountType from "@/sections/dashboard/setAccountType";
 
 export const metadata: Metadata = {
   description: "Manage all your activities here",
@@ -20,7 +20,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   return (
     <DashboardLayout>
       <PageTransition>{children}</PageTransition>
-      {!user?.role && <SetClaims />}
+      {!["agent", "renter"].includes(user?.accountType || "") && <SetAccountType />}
     </DashboardLayout>
   );
 }

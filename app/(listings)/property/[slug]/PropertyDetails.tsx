@@ -9,7 +9,6 @@ import {
 import currency from "currency.js";
 import { useRouter } from "next/navigation";
 import MultiImageSlider from "@/components/multiImageSlider";
-import { _properties } from "@/_data/images";
 import BaseLayout from "@/sections/layout";
 import Reviews from "@/sections/reviews";
 import StartMessageAndBookInspection from "@/sections/messages/StartMessageAndBookInspection";
@@ -17,13 +16,13 @@ import { PropertyDocument } from "@/server/schema/Property";
 import { ReviewDocument } from "@/server/schema/Review";
 
 
-export default async function PropertyDetails({ property, reviews }: {property: PropertyDocument, reviews: ReviewDocument[]}) {
+export default async function PropertyDetails({ property, reviews }: {property?: PropertyDocument | any, reviews?: ReviewDocument[] | any}) {
   return (
     <BaseLayout>
       <div className="w-full mx-auto flex flex-col px-2">
         <div className="w-full mx-auto max-w-8xl h-[50vh] mt-5 mb-20 relative " 
           style={{
-            backgroundImage: `url(${_properties[0]?.image as string })`,
+            backgroundImage: `url(${property?.images[0] as string })`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             borderRadius: "16px",
@@ -41,9 +40,7 @@ export default async function PropertyDetails({ property, reviews }: {property: 
         </div>
 
         <ImageInformation property={property} />
-        {/* <TestimonialSlider /> */}
         <Reviews propertyId={property._id as any} reviews={reviews as any} />
-        {/* <FeaturedProperty property={property as any} /> */}
       </div>
     </BaseLayout>
   );
@@ -98,12 +95,15 @@ const ImageInformation = ({ property }: { property: PropertyDocument }) => {
   return (
     <div className="w-full mx-auto max-w-8xl flex items-start gap-8 md:flex-row flex-col px-2 py-8">
       <div className="w-full max-w-lg flex flex-col items-start gap-4">
-        <Button 
-          onClick={() => router.push(`/map?lat=${lat}&lon=${lon}`)} 
-          variant='ghost'
-          className="flex items-center gap-2 border-none bg-slate-200">
-          <MapPin className="w-4 text-primary" />
-          {property?.address ?? "Address not available"}
+       <Button
+          onClick={() => router.push(`/map?lat=${lat}&lon=${lon}`)}
+          variant="ghost"
+          className="flex items-center gap-2 border-none bg-slate-200 max-w-full"
+        >
+          <MapPin className="w-4 text-primary shrink-0" />
+          <span className="truncate block max-w-[200px]">
+            {property?.address ?? "Address not available"}
+          </span>
         </Button>
         <h1 className="text-2xl capitalize font-bold text-slate-800 text-start">
           {property?.title ?? "No Title"}
@@ -122,10 +122,12 @@ const ImageInformation = ({ property }: { property: PropertyDocument }) => {
       </div>
 
       <MultiImageSlider
-        // images={property.images || []}
-        images={_properties.map(res => res.image).map((image: string) => (typeof image === "string" ? image : "")).filter(Boolean) || []}
-        limit={6} 
-      />
+          images={
+            property.images?.filter(
+              (image): image is string => typeof image === "string"
+            ) ?? []
+          }
+        />
     </div>
   );
 };

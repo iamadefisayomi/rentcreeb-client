@@ -18,9 +18,9 @@ export default function RandomImagesGallery ({images}: ImagesProps) {
             <div className="w-full flex flex-col h-full md:flex-row-reverse md:items-center items-start gap-8 md:gap-20">
                 <Gallery images={images} />
                 <div className='flex flex-col items-start gap-3 max-w-md'>
-                    <h4 className="text-primary uppercase text-xs font-medium">mervelous world</h4>
-                    <h1 className="text-2xl md:text-4xl capitalize font-bold text-start">Image Speaks <br /> Volume: Explore the <br /> Our Gallery.</h1>
-                    <p className="text-xs text-muted-foreground">Lorem ipsum dolor sit  molestiae delectus, iste velit ad quidem perferendis.</p>
+                    {/* <h4 className="text-primary uppercase text-xs font-medium">mervelous world</h4> */}
+                    <h1 className="text-2xl md:text-4xl capitalize font-bold text-start">Image Speaks <br /> Volume: Explore Our <br /> Gallery.</h1>
+                    <p className="text-xs text-muted-foreground">Every picture paints a lifestyle. Browse through curated spaces designed to spark ideas and guide your rental journey.</p>
                     <Button onClick={() => router.push("/gallery")} className="w-full max-w-[150px] text-xs md:h-12">
                         View all photo
                     </Button>

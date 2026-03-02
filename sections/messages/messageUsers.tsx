@@ -36,7 +36,7 @@ export function DefaultUserCard({ user }: { user: any }) {
         </Avatar>
         <div className="flex flex-col">
           <h4 className="text-[11px] font-medium">{user?.name || user?.email || "Guest"}</h4>
-          <p className="text-[10px] text-muted-foreground">{user?.role}</p>
+          <p className="text-[10px] text-muted-foreground">{user?.accountType}</p>
         </div>
       </div>
       <button>

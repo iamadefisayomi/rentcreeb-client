@@ -11,7 +11,7 @@ import { ShowToolTip } from '@/components/showTooTip';
 interface LoveButtonProps {
   propertyId: any;
   className?: string;
-  favourites: string[]
+  favourites?: string[]
 }
 
 export default function LoveButton({

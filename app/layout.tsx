@@ -17,16 +17,16 @@ export const viewport: Viewport = {
  
 export const metadata: Metadata = {
   title: {
-    template: '%s | Rent-Creeb® - Your Trusted Home Rental Partner',
-    default: 'Rent-Creeb® - Find Your Perfect Home',
+    template: '%s | RentCreeb® - Your Trusted Home Rental Partner',
+    default: 'RentCreeb® - Find Your Perfect Home',
   },
   manifest: "../manifest.json",
-  description: 'Rent-Creeb® is your trusted platform for finding and renting homes. Explore a wide range of properties tailored to your needs. Secure, easy, and fast house renting.',
-  keywords: 'house renting, home rental, Rent-Creeb, property rental, apartment renting, find homes, secure renting, trusted rental service',
-  authors: [{ name: 'Rent-Creeb® Team', url: 'https://www.rentcreeb.com' }],
+  description: 'RentCreeb® is your trusted platform for finding and renting homes. Explore a wide range of properties tailored to your needs. Secure, easy, and fast house renting.',
+  keywords: 'house renting, home rental, RentCreeb, property rental, apartment renting, find homes, secure renting, trusted rental service',
+  authors: [{ name: 'RentCreeb® Team', url: 'https://www.rentcreeb.com' }],
   openGraph: {
-    title: 'Rent-Creeb® - Find Your Perfect Home',
-    description: 'Explore a wide range of properties with Rent-Creeb®. Your trusted platform for secure and easy house renting.',
+    title: 'RentCreeb® - Find Your Perfect Home',
+    description: 'Explore a wide range of properties with RentCreeb®. Your trusted platform for secure and easy house renting.',
     url: 'https://www.rentcreeb.com',
     type: 'website',
     images: [
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
         url: 'https://www.rentcreeb.com/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Rent-Creeb® - Find Your Perfect Home',
+        alt: 'RentCreeb® - Find Your Perfect Home',
       },
     ],
   },
@@ -49,6 +49,9 @@ export default function RootLayout({
   
   return (
     <html lang="en">
+      <head>
+        <link rel="preload" as="image" href="/hero4.png" fetchPriority="high" />
+      </head>
       <body
         className={cn(poppins.className, "antialiased bg-slate-50")}
       >

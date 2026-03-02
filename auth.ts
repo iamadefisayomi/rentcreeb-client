@@ -57,7 +57,7 @@ export const auth = betterAuth({
       phone: { type: "string", required: false, defaultValue: '' },
       whatsapp: { type: "string", required: false, defaultValue: '' },
       gender: { type: "string", required: false, defaultValue: "" },
-      role: { type: "string", required: false, defaultValue: "" },
+      accountType: { type: "string", required: false, defaultValue: "renter" },
     },
     changeEmail: {
             enabled: true,
@@ -106,7 +106,7 @@ export async function generateUsername(email: string): Promise<string> {
 
   // Ensure it's unique
   await dbConnection()
-  while (await User.findOne({ username })) {
+  while (await User.findOne({ username }).lean()) {
     username = `${base}-${uid.randomUUID()}`;
   }
 

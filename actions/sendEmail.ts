@@ -89,7 +89,7 @@ export async function sendEmail({to, name, message, link, subject, linkDescripti
       <p><a href="mailto:support@rentcreeb.com" class="button">Contact Support</a></p>
     </div>
     <div class="footer">
-      &copy; 2024 RentCreeb INC |  
+      &copy; 2025 RentCreeb INC |  
       <a href="https://rentcreeb.com/unsubscribe?email=${to}">Unsubscribe</a>
     </div>
   </div>

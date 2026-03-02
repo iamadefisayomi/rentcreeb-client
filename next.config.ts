@@ -37,13 +37,18 @@ const nextConfig: NextConfig = {
         hostname: "rentcreeb.b-cdn.net",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
     ],
   },
   experimental: {
     serverActions: {
       bodySizeLimit: "50mb", // Increase limit (e.g., 10MB)
     },
-    nodeMiddleware: true
+    // nodeMiddleware: true
   },
 };
 

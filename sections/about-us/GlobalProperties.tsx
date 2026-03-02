@@ -12,9 +12,16 @@ export default function GlobalProperties () {
     return (
         <div className="w-full bg-white items-center flex justify-center min-h-[70vh] px-4">
         <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 place-items-start max-w-8xl md:py-20 py-10 gap-10">
-            <span
-                style={{ backgroundImage: `url(${_properties[0].image})` }}
-                className="w-full h-[500px] bg-contain bg-center mask1 "
+             <Image
+                src="/about-us-global.svg"
+                alt="About us"
+                width={400}
+                height={400}
+                className="object-contain object-center w-full h-[500px]"
+                priority={true} 
+                draggable={false}
+                placeholder="blur"
+                blurDataURL="/hero4-blur.png"
             />
 
             <div className="w-full flex flex-col items-start justify-between h-full gap-4">
@@ -28,7 +35,7 @@ export default function GlobalProperties () {
                 <div className="grid grid-cols-3 w-full gap-4 md:gap-6 py-4">
                     <Statcard label='10k' details='satisfied customers' />
                     <Statcard label='8+' details='years of experience' />
-                    <Statcard label='200k' details='established housing' />
+                    <Statcard label='200k' details='Listed properties' />
                 </div>
 
                 <div className="flex items-start flex-col gap-8 w-full md:flex-row">

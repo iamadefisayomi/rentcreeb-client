@@ -3,7 +3,7 @@ import { _properties } from "@/_data/images";
 import GlobalProperties from "@/sections/about-us/GlobalProperties";
 import SignatureFeature from "@/sections/about-us/SignatureFeature";
 import ExploreGallery from "@/sections/home/ExploreGallery";
-import TestimonialSlider from "@/sections/home/TestimonialSlider";
+import TestimonialSlider from "@/sections/testimonials";
 import Team from "@/sections/about-us/Team";
 
 

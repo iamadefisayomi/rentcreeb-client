@@ -104,6 +104,16 @@ export const newPropertySchema = yup.object().shape({
   type: yup.string().required('Property type is required').default(_propertyTypes.all),
   listedIn: yup.string().required('Listed in is required'),
   status: yup.string().required().default('Available'),
+  paymentFrequency: yup
+    .string()
+    .oneOf(["yearly", "quarterly", "monthly"])
+    .when("listedIn", {
+      is: (val: string) => val?.toLowerCase() === "rent",
+      then: (schema) =>
+        schema.required("Please select payment frequency for rental property"),
+      otherwise: (schema) => schema.nullable().default(null),
+    })
+    .default("yearly"),
 
   // Pricing & Features
   price: yup

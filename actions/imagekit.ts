@@ -122,7 +122,6 @@ export async function deleteSingleImage(fileId: string) {
     const imagekit = getImageKit()
 
     const res = await imagekit.deleteFile(fileId);
-
     return {
       success: true,
       message: "Image deleted successfully",

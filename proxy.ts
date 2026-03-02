@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { headers } from "next/headers";
 import { auth } from '@/auth';
 
-export default async function middleware(req: NextRequest) {
+export default async function proxy(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   const path = req.nextUrl.pathname;
 
@@ -14,7 +14,7 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/signin', req.url));
   }
 
-  const isAgent = session?.user.role === 'agent';
+  const isAgent = session?.user.accountType === 'agent';
 
   if (!isAgent && path.includes('/tools')) {
     return NextResponse.redirect(new URL('/', req.url));
@@ -27,6 +27,5 @@ export default async function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
-  runtime: "nodejs",
+  matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)']
 };

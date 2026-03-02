@@ -36,13 +36,13 @@ export default function ListingsLayout({
         </div>
       }
     >
-      <div className={cn("w-full flex flex-col mx-auto gap-4 max-w-7xl px-4", pageViewStyle === "grid" && "")}>
+      <div className={cn("w-full flex flex-col mx-auto gap-4", pageViewStyle === "list" && "max-w-7xl")}>
         {pageViewStyle === "list" && <PageViewStyleAndSort />}
 
         <div className="w-full flex-grow">
           <div className="py-32 md:hidden flex" />
           <div className="w-full mx-auto flex items-start pb-10 gap-4">
-            <div className="w-full hidden flex-col items-start max-w-xs md:flex">
+            <div className="w-full hidden flex-col items-start max-w-xs md:flex flex-grow ">
               <HomeFilterForm />
               <PropertyNotFound />
             </div>
@@ -50,9 +50,7 @@ export default function ListingsLayout({
             <div className="w-full flex flex-col gap-4">
               {pageViewStyle === "grid" && <PageViewStyleAndSort />}
 
-              <div className={cn("w-full grid grid-cols-1 gap-4", pageViewStyle === 'grid' && "md:grid-cols-2")}>
-                {children}
-              </div>
+              {children}
 
             </div>
           </div>

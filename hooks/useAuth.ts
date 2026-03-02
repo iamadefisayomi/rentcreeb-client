@@ -85,7 +85,7 @@ export function useAuth () {
                     email: data.email,
                     password: data.password,
                     username: data.username,
-                    role: data.role,
+                    accountType: data.role,
                     callbackURL: Routes.dashboard["account management"]["account information"]
                 })
                 if (error) throw new Error(error.message)

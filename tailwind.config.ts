@@ -69,6 +69,13 @@ const config = {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.3' },
         },
+        shake: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "20%": { transform: "translateX(-4px)" },
+          "40%": { transform: "translateX(4px)" },
+          "60%": { transform: "translateX(-4px)" },
+          "80%": { transform: "translateX(4px)" },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -82,6 +89,7 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
          blink: 'blink 1.2s infinite',
+         shake: "shake 0.4s ease-in-out",
       },
     },
   },

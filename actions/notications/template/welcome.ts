@@ -126,7 +126,7 @@ export default function welcomeEmail ({name, messageTitle, message}: {name: stri
       <p><a href="mailto:support@rentcreeb.com" class="button" aria-label="Contact Support via Email">Contact Support</a></p>
     </div>
     <div class="footer" role="contentinfo">
-      &copy; 2024 Rent House INC |  
+      &copy; 2025 Rent House INC |  
       <a href="https://rentcreeb.com/unsubscribe?email=${process.env.MAIN_EMAIL}" aria-label="Unsubscribe from Rent House INC emails">Unsubscribe</a>
     </div>
   </div>

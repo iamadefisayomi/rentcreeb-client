@@ -1,8 +1,7 @@
+import { getUserFavourites } from "@/actions/favourites";
 import { getProperties } from "@/actions/properties";
-import SimilarProperty from "@/sections/property/SimilarProperties";
-import SingleProperty from "@/sections/property/singleProperty";
+import ClientListProperties from "@/sections/property/clientListProperties";
 import { SearchPropertySchemaType } from "@/sections/SearchForms/formSchemas";
-import { Fragment } from "react";
 
 type ListingsProps = {
   params: Promise<{ id: string }>;
@@ -10,6 +9,8 @@ type ListingsProps = {
 };
 
 export default async function ForSale({ searchParams }: ListingsProps) {
+
+  const favs = await (await getUserFavourites()).data
   const resolvedSearchParams = await searchParams;
 
   const cleanedQuery = Object.fromEntries(
@@ -28,18 +29,5 @@ export default async function ForSale({ searchParams }: ListingsProps) {
     sortBy,
   });
 
-  return (
-    <Fragment>
-      {properties && properties.length > 0 ? (
-        properties.map((property: any, index: number) => (
-          <SingleProperty property={property} key={index} />
-        ))
-      ) : (
-        <div className="text-center py-20 text-gray-500">
-          No properties found matching your filters.
-        </div>
-      )}
-      <SimilarProperty similarProperties={similarProperties as any} />
-    </Fragment>
-  );
+  return <ClientListProperties initialProperties={properties} filters={cleanedQuery} sortBy={sortBy} favs={favs} />;
 }

@@ -1,51 +1,55 @@
 
 import { _properties } from "@/_data/images";
-import {getRandomPropertyImages } from "@/actions/properties";
-import { getProperties } from "@/actions/properties";
-import LayoutWithImageHeader from "@/components/layoutWithImageHeader";
 import ExploreGallery from "@/sections/home/ExploreGallery";
-import TestimonialSlider from "@/sections/home/TestimonialSlider";
 import OurServices from "@/sections/ourServices";
-import SingleProperty from "@/sections/property/singleProperty";
 import { HomeSearchBox } from "@/sections/SearchForms/HomeSearchBox";
-import { PropertyDocument } from "@/server/schema/Property";
+import BaseLayout from "@/sections/layout";
+import { Button } from "@/components/ui/button";
+import Testimonials from "@/sections/testimonials";
+import HowWeWork from "@/sections/OurWork";
+import FeaturedProperties, { FeaturedPropertiesSkeleton } from "@/sections/property/featured";
+import { Suspense } from "react";
+import Image from "next/image";
+import { getUserFavourites } from "@/actions/favourites";
+import { getProperties } from "@/actions/properties";
 
 
 export default async function Index() {
-  const {properties, recommended, similarProperties} = await getProperties({limit: 4}) || []
-  const images = await (await getRandomPropertyImages()).data
+
+  const favourites = await (await getUserFavourites()).data
+  const { properties } = await getProperties({limit: 6});
 
   return (
-    <LayoutWithImageHeader
-      bgImage="https://images.unsplash.com/photo-1649770638560-b0011db12a76?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-      component={
-        <div className="p-2 w-full flex items-center justify-center absolute top-52 lg:relative z-20 lg:top-0">
-          <HomeSearchBox />
-        </div>
-      }
-    >
-
-      <div className="py-32 lg:hidden flex bg-white" />
-      <div className="flex w-full items-center justify-center flex-col ">
-        <div className="w-full bg-[#edefff] px-2 py-8 md:py-20 md:h-screen flex flex-col items-center justify-center">
-          <div className="flex w-full flex-col gap-3 mb-6 md:mb-8">
-            <p className="text-xs font-medium uppercase text-primary text-center">explore properties</p>
-            <h2 className="text-xl md:text-3xl capitalize font-bold text-center">comfort living solution</h2>
+    <BaseLayout>
+      <div className="relative py-20 min-h-[90vh] flex items-center justify-center">
+        <Image
+          src="/hero4.png"
+          alt="Hero Background"
+          fill
+          priority
+          className="object-cover"
+        />
+        <div className="relative z-10 w-full h-full flex flex-col items-center gap-8 max-w-8xl p-4">
+          <div className="w-full flex items-center flex-col gap-2">
+              <h2 className="text-7xl font-medium text-white text-center">Find Your Perfect <br /> Home with Ease</h2>
+              <p className="text-sm font-[300] text-white text-center">Discover verified properties across Nigeria. <br /> Rent or buy safely with RentCreeb.</p>
           </div>
-
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 px-2 gap-4 max-w-8xl mx-auto">
-            {
-              properties && properties.length > 0 && properties.map((property, index) => (
-                <SingleProperty isGrid={true} property={property as PropertyDocument} key={index} />
-              ))
-            }
-          </div>
+            <HomeSearchBox />
         </div>
-
-        <ExploreGallery />
-        <OurServices />
-        <TestimonialSlider />
       </div>
-    </LayoutWithImageHeader>
+
+       <Suspense fallback={<FeaturedPropertiesSkeleton />}>
+        <FeaturedProperties properties={properties} />
+      </Suspense>
+      <HowWeWork />
+      <ExploreGallery />
+      <OurServices />
+      <Testimonials />
+      <div className="w-full min-h-[50vh] bg-primary flex gap-4 items-center flex-col justify-center">
+          <h2 className="text-white text-3xl text-center font-semibold">Ready to Find Your Next Home?</h2>
+          <p className="text-white text-center">Join thousands of Nigerians who have found their perfect property through <br /> RentCreeb.</p>
+          <Button variant='secondary' size='lg' className="text-primary">Explore Properties</Button>
+      </div>
+    </BaseLayout>
   );
 }

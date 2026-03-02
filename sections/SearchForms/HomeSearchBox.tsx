@@ -146,7 +146,7 @@ export function HomeSearchBox() {
     listedIn,
     type,
     state,
-    lga,
+    lga, 
     city,
   ].filter(Boolean).join("/").toLowerCase();
 
@@ -163,14 +163,14 @@ export function HomeSearchBox() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full flex flex-col gap-3 md:p-6 p-4 bg-slate-900 rounded-2xl max-w-5xl"
+        className="w-full flex flex-col gap-3 md:p-6 p-4 bg-white rounded-2xl max-w-5xl"
       >
         {/* Listed In */}
         <FormField
           control={form.control}
           name="listedIn"
           render={({ field }) => (
-            <FormItem className="flex items-center justify-center w-full border-b border-muted-foreground text-background pb-3">
+            <FormItem className="flex items-center justify-center w-full border-b border-muted text-background pb-3">
               <FormControl>
                 <ToggleGroup
                   value={field.value || ''}
@@ -179,7 +179,7 @@ export function HomeSearchBox() {
                   className="grid grid-cols-3 w-full max-w-md"
                 >
                   {Object.entries(_listedIn).map(([key, value], index) => (
-                    <ToggleGroupItem key={index} value={value} aria-label={key}>
+                    <ToggleGroupItem key={index} value={value} aria-label={key} className="hover:bg-primary text-gray-700 hover:text-white">
                       <h3 className="text-sm capitalize font-semibold ">
                         {key}
                       </h3>

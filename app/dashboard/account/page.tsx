@@ -24,7 +24,7 @@ export default async function Page() {
 
   return (
     <div className="w-full flex flex-col gap-4">
-      {user?.role === "agent" && (
+      {user?.accountType === "agent" && (
         <>
           <Verification title="identity verification" userScore={userScore?.score} />
           <TrustScore userScore={userScore?.score} />
