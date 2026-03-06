@@ -4,6 +4,8 @@ import { getReviews } from "@/actions/reviews";
 import { PropertyDocument } from "@/server/schema/Property";
 import { ReviewDocument } from "@/server/schema/Review";
 
+export const maxDuration = 60;
+
 type Props = {
   params: Promise<{ slug: string }>;
 };

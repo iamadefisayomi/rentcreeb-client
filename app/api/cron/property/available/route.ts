@@ -7,6 +7,8 @@ import { sendEmail } from '@/actions/sendEmail';
 import { NEXT_PUBLIC_BASE_URL } from '@/constants';
 import { performance } from 'perf_hooks';
 
+export const maxDuration = 60;
+
 export async function GET(req: Request) {
   try {
     if (req.headers.get('vercel-cron') !== '1') {

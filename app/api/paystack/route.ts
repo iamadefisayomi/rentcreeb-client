@@ -1,8 +1,14 @@
+import { getCurrentUser } from "@/actions/auth";
 import { NEXT_PUBLIC_BASE_URL } from "@/constants";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
+
+  const user = await getCurrentUser()
+      if (!user) throw new Error("invalid request!")
+        // 
+
   const { verifySubTransaction } = await import("@/actions/subscription");
   const Routes = (await import("@/Routes")).default || (await import("@/Routes"));
   // optional to guard environment var

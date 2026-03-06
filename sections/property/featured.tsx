@@ -1,11 +1,8 @@
 "use client"
 
-import { getProperties } from "@/actions/properties";
 import { Skeleton } from "@/components/ui/skeleton";
 import PropertyLayout from "./propertyLayout";
-import { getUserFavourites } from "@/actions/favourites";
 import { PropertyDocument } from "@/server/schema/Property";
-import { IFavourite } from "@/server/schema/Favourite";
 
 
 export default function FeaturedProperties({properties}: {properties: PropertyDocument[]}) {
@@ -17,7 +14,7 @@ export default function FeaturedProperties({properties}: {properties: PropertyDo
           featured properties
         </h2>
 
-        <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 p-8">
+        <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 px-3 py-6">
           {properties?.map((property: any, idx: number) => (
             <PropertyLayout
               key={property._id.toString()}

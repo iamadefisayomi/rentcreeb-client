@@ -32,7 +32,7 @@ export const _listedIn ={
 }
 
 export const _propertyTypes = {
-  all: "",
+  // all: "",
   apartment: "Apartment",
   house: "House",
   hall: "hall",

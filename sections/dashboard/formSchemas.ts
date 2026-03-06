@@ -101,9 +101,9 @@ export const newPropertySchema = yup.object().shape({
   // Core Info
   title: yup.string().required('Property title is required').trim().min(6),
   description: yup.string().required('Property description is required').trim().min(20),
-  type: yup.string().required('Property type is required').default(_propertyTypes.all),
+  type: yup.string().required('Property type is required'),
   listedIn: yup.string().required('Listed in is required'),
-  status: yup.string().required().default('Available'),
+  status: yup.string().required().default('available'),
   paymentFrequency: yup
     .string()
     .oneOf(["yearly", "quarterly", "monthly"])

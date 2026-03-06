@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import {
@@ -28,14 +28,32 @@ import { _listedIn, _propertyTypes } from "@/_data/_propertyDefault";
 import useCookies from "@/hooks/useCookies";
 import AddressAutocomplete from "../Autocomplete/AddressAutocomplete";
 
+
+
+function parseSearchParams(searchParams: URLSearchParams) {
+  const values: any = {};
+
+  searchParams.forEach((value, key) => {
+    if (["min", "max", "bedrooms", "bathrooms", "garages", "parkings"].includes(key)) {
+      values[key] = Number(value);
+    } else {
+      values[key] = value;
+    }
+  });
+
+  return values;
+}
+
+
 export function HomeSearchBox() {
+
   const isDesktop = useResponsive() === "desktop";
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   // Cookie for form state
-  const [savedFormValues, setSavedFormValues] =useCookies<SearchPropertySchemaType | any>("propertySearchForm", {}, 24);
+  const [savedFormValues, setSavedFormValues] =useState<SearchPropertySchemaType | any>();
 
   // Sync query params into cookies on first load
   useEffect(() => {
@@ -48,6 +66,14 @@ export function HomeSearchBox() {
       setSavedFormValues(paramsObj as unknown as SearchPropertySchemaType);
     }
   }, [pathname, searchParams]);
+
+  useEffect(() => {
+    const parsed = parseSearchParams(searchParams);
+    form.reset({
+      listedIn: parsed.listedIn || _listedIn.rent,
+      ...parsed,
+    });
+  }, [searchParams]);
 
   const form = useForm<SearchPropertySchemaType>({
   resolver: yupResolver(propertySearchSchema),

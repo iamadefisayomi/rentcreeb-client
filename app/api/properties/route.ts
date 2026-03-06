@@ -1,22 +1,27 @@
+import { getCurrentUser } from "@/actions/auth";
 import { getProperties } from "@/actions/properties";
-import { SearchPropertySchemaType } from "@/sections/SearchForms/formSchemas";
 import { NextRequest, NextResponse } from "next/server";
+
+export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
   try {
+    // const user = await getCurrentUser()
+    // if (!user) throw new Error("invalid request!")
+    //   // 
     const url = new URL(req.url);
-    const page = Number(url.searchParams.get("page") || "1");  // <-- get page
+    const page = Number(url.searchParams.get("page") || "1");
     const limit = Number(url.searchParams.get("limit") || "20");
-    const sortBy = url.searchParams.get("sortBy") || undefined;
 
-    const filters = {} as unknown as SearchPropertySchemaType;
+    const filters: Record<string, any> = {};
+    url.searchParams.forEach((value, key) => {
+      if (!["page", "limit"].includes(key)) filters[key] = value;
+    });
 
     const { properties } = await getProperties({
       filters,
-      sortBy,
       limit,
-      page,        // <-- pass page
-      order: -1,
+      page,
     });
 
     return NextResponse.json({ properties });

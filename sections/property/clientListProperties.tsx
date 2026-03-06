@@ -1,57 +1,73 @@
 "use client";
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { PropertyDocument } from "@/server/schema/Property";
 import { Skeleton } from "@/components/ui/skeleton";
 import PropertyLayout from "./propertyLayout";
+import { useSearchParams } from "next/navigation";
 
 interface Props {
   initialProperties: PropertyDocument[];
-  filters: Record<string, any>;
-  sortBy?: string;
+  initialPage: number;
   favs?: any[];
   limit?: number;
 }
 
-export default function ClientListProperties({ initialProperties, filters, sortBy, favs, limit = 20 }: Props) {
-  const [properties, setProperties] = useState<PropertyDocument[]>(initialProperties);
-  const [page, setPage] = useState(1);
+export default function ClientListProperties({
+  initialProperties,
+  initialPage,
+  favs,
+  limit = 20,
+}: Props) {
+  const searchParams = useSearchParams();
+  const queryString = searchParams.toString();
+
+  const [properties, setProperties] = useState(initialProperties);
+  const [page, setPage] = useState(initialPage);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(
+    initialProperties.length === limit
+  );
+
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
+  // 🔥 Reset when URL changes
+  useEffect(() => {
+    setProperties(initialProperties);
+    setPage(initialPage);
+    setHasMore(initialProperties.length === limit);
+  }, [queryString, initialProperties, initialPage, limit]);
+
   const fetchMore = useCallback(async () => {
-  if (loading || !hasMore) return;
+    if (loading || !hasMore) return;
 
-  setLoading(true);
+    setLoading(true);
 
-  setPage(prevPage => {
-    const nextPage = prevPage + 1;
+    try {
+      const nextPage = page + 1;
 
-    const params = new URLSearchParams({
-      page: nextPage.toString(),
-      limit: limit.toString(),
-      sortBy: sortBy || "",
-      ...Object.fromEntries(
-        Object.entries(filters).map(([k, v]) => [k, String(v)])
-      ),
-    });
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", nextPage.toString());
+      params.set("limit", limit.toString());
 
-    fetch(`/api/properties?${params.toString()}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data.properties?.length) {
-          setHasMore(false);
-        } else {
-          setProperties(prev => [...prev, ...data.properties]);
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      const res = await fetch(`/api/properties?${params.toString()}`);
+      const data = await res.json();
 
-    return nextPage;
-  });
-}, [filters, sortBy, loading, hasMore, limit]);
 
+      if (!data.properties?.length) {
+        setHasMore(false);
+      } else {
+        setProperties(prev => [...prev, ...data.properties]);
+        setPage(nextPage);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, loading, hasMore, searchParams, limit]);
+
+  // 🔥 Infinite Scroll Observer
   useEffect(() => {
     const current = sentinelRef.current;
     if (!current) return;
@@ -66,10 +82,7 @@ export default function ClientListProperties({ initialProperties, filters, sortB
     );
 
     observer.observe(current);
-
-    return () => {
-      observer.unobserve(current);
-    };
+    return () => observer.disconnect();
   }, [fetchMore]);
 
   return (
@@ -89,16 +102,13 @@ export default function ClientListProperties({ initialProperties, filters, sortB
           {Array.from({ length: 3 }).map((_, idx) => (
             <div key={idx} className="flex flex-col space-y-3">
               <Skeleton className="h-[255px] rounded-xl" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[200px]" />
-              </div>
+              <Skeleton className="h-4 w-[250px]" />
             </div>
           ))}
         </div>
       )}
 
-      {hasMore && <div ref={sentinelRef} className="h-1"></div>}
+      {hasMore && <div ref={sentinelRef} className="h-1" />}
     </div>
   );
 }

@@ -186,7 +186,7 @@ export default function PropertyForm ({type, defaultValues}: {type: 'new' | 'edi
                                 <FormLabel className="">Property Type*</FormLabel>
                                 <FormControl>
                                 <DropDownComp
-                                    title={field.value || 'all'}
+                                    title={field.value}
                                     className="border bg-slate-50 capitalize rounded-md"
                                     component={
                                     <div className="flex w-full flex-col gap-1 items-start">
@@ -217,7 +217,7 @@ export default function PropertyForm ({type, defaultValues}: {type: 'new' | 'edi
                             <FormItem className="w-full">
                                 <FormLabel className="flex items-center gap-3 mb-1">
                                     Description*
-                                    <GenerateDescription description={field.value} property={form.watch()} setDescription={field.onChange} />
+                                    {/* <GenerateDescription description={field.value} property={form.watch()} setDescription={field.onChange} /> */}
                                 </FormLabel>
                                 <FormControl >
                                     <div className="w-full items-end flex flex-col gap-2">
@@ -229,7 +229,7 @@ export default function PropertyForm ({type, defaultValues}: {type: 'new' | 'edi
                         )}
                     />
 
-                    <div className="w-full grid gap-2 grid-cols-2">
+                    <div className="w-full grid gap-2 grid-cols-3">
                         <FormField
                             control={form.control}
                             name="listedIn"
@@ -238,7 +238,7 @@ export default function PropertyForm ({type, defaultValues}: {type: 'new' | 'edi
                                 <FormLabel className="">Listed in*</FormLabel>
                                 <FormControl>
                                 <DropDownComp
-                                    title={field.value || _listedIn.rent}
+                                    title={field.value}
                                     
                                     component={
                                     <div className="flex w-full flex-col gap-1 items-start">
@@ -282,6 +282,37 @@ export default function PropertyForm ({type, defaultValues}: {type: 'new' | 'edi
                                             className="text-[11px] w-full flex justify-start items-center rounded-none capitalize"
                                         >
                                             {key}
+                                        </Button>
+                                        ))}
+                                    </div>
+                                    }
+                                />
+                                </FormControl>
+                            </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="paymentFrequency"
+                            render={({ field }) => (
+                            <FormItem className="w-full">
+                                <FormLabel className="">Payment Frequency*</FormLabel>
+                                <FormControl>
+                                <DropDownComp
+                                    title={field.value}
+                                    
+                                    component={
+                                    <div className="flex w-full flex-col gap-1 items-start">
+                                        {["yearly", "quarterly", "monthly"].map((value, index) => (
+                                        <Button
+                                            size="sm"
+                                            onClick={() => field.onChange(value)}
+                                            variant="ghost"
+                                            key={index}
+                                            className="text-[11px] w-full flex justify-start items-center rounded-none capitalize"
+                                        >
+                                            {value}
                                         </Button>
                                         ))}
                                     </div>

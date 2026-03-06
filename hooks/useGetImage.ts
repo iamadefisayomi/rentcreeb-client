@@ -1,49 +1,56 @@
 import { errorMessage } from "../constants";
 
-// Improved TypeScript Types
-type ImageResponse = {
+/** ----------------- Types ----------------- */
+export type ImageResponse<T = File | File[]> = {
   success: boolean;
-  data: File | string | null;
+  data: T | null;
   message: string | null;
+};
+
+/** ----------------- Constants ----------------- */
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+/** ----------------- Helpers ----------------- */
+function validateFile(file: File): void {
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    throw new Error(`Unsupported file type: ${file.type}`);
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(`File too large (max ${MAX_FILE_SIZE / (1024 * 1024)}MB): ${file.name}`);
+  }
 }
 
-// Improved error handling and type safety for image upload and deletion functions
-export function getSingleImage(e: React.ChangeEvent<HTMLInputElement>) {
+/** ----------------- Get Single Image ----------------- */
+export function getSingleImage(e: React.ChangeEvent<HTMLInputElement>): ImageResponse<File> {
   try {
-    const imageData = e.target.files?.[0];
-    if (imageData && imageData.type.startsWith('image/')) {
-      return {
-        success: true,
-        data: imageData,
-        message: null
-      };
-    } else {
-      throw new Error('Only images are supported');
-    }
+    const file = e.target.files?.[0];
+    if (!file) return { success: false, data: null, message: "No file selected" };
+
+    validateFile(file);
+
+    return { success: true, data: file, message: null };
   } catch (err: any) {
     return errorMessage(err.message);
   }
 }
 
-export function getMultipleImages(e: React.ChangeEvent<HTMLInputElement>) {
+/** ----------------- Get Multiple Images ----------------- */
+export function getMultipleImages(e: React.ChangeEvent<HTMLInputElement>): ImageResponse<File[]> {
   try {
-    const imageFiles = e.target.files;
-    
-    if (!imageFiles || imageFiles.length === 0) {
-      throw new Error('No images selected');
-    }
+    const files = e.target.files;
+    if (!files || files.length === 0) return { success: false, data: null, message: "No files selected" };
 
-    const validImages = Array.from(imageFiles).filter(file => file.type.startsWith('image/'));
+    const validFiles = Array.from(files)
+      .filter(file => file.type.startsWith("image/"))
+      .map((file) => {
+        validateFile(file);
+        return file;
+      });
 
-    if (validImages.length === 0) {
-      throw new Error('Only images are supported');
-    }
+    if (validFiles.length === 0) return { success: false, data: null, message: "No valid images found" };
 
-    return {
-      success: true,
-      data: validImages, // Returns an array of images
-      message: null
-    };
+    return { success: true, data: validFiles, message: null };
   } catch (err: any) {
     return errorMessage(err.message);
   }
