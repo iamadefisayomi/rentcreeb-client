@@ -38,7 +38,7 @@ export function FeaturedPropertiesSkeleton() {
 
         <div className="w-full grid grid-cols-3 gap-8 p-8">
           {Array.from({length: 6}).map((property: any, idx: number) => (
-            <div className="flex flex-col space-y-3">
+            <div key={idx} className="flex flex-col space-y-3">
                 <Skeleton className="h-[255px] rounded-xl" />
                 <div className="space-y-2">
                     <Skeleton className="h-4 w-[250px]" />

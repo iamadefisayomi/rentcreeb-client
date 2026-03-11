@@ -11,12 +11,12 @@ import { useRouter } from "next/navigation";
 import MultiImageSlider from "@/components/multiImageSlider";
 import BaseLayout from "@/sections/layout";
 import Reviews from "@/sections/reviews";
-import StartMessageAndBookInspection from "@/sections/messages/StartMessageAndBookInspection";
 import { PropertyDocument } from "@/server/schema/Property";
 import { ReviewDocument } from "@/server/schema/Review";
+import StartMessageAndBookInspection from "@/sections/messages/StartMessageAndBookInspection";
 
 
-export default async function PropertyDetails({ property, reviews }: {property?: PropertyDocument | any, reviews?: ReviewDocument[] | any}) {
+export default function PropertyDetails({ property, reviews }: {property?: PropertyDocument | any, reviews?: ReviewDocument[] | any}) {
   return (
     <BaseLayout>
       <div className="w-full mx-auto flex flex-col px-2">
@@ -40,13 +40,13 @@ export default async function PropertyDetails({ property, reviews }: {property?:
         </div>
 
         <ImageInformation property={property} />
-        <Reviews propertyId={property._id as any} reviews={reviews as any} />
+        <Reviews propertyId={property?._id as any} reviews={reviews as any} />
       </div>
     </BaseLayout>
   );
 }
 
-const ImageInformation = ({ property }: { property: PropertyDocument }) => {
+const ImageInformation = ({ property }: { property: PropertyDocument & {userId: {email: string}} }) => {
 
   const router = useRouter()
   const [lat, lon] = (() => {
@@ -113,17 +113,18 @@ const ImageInformation = ({ property }: { property: PropertyDocument }) => {
         </p>
 
         <h3 className="text-2xl font-semibold">
-          {currency(property.price, { symbol: "₦", precision: 2 }).format()} <span className="text-[11px] text-muted-foreground">/year</span>
+          {currency(property?.price, { symbol: "₦", precision: 2 }).format()} <span className="text-[11px] text-muted-foreground">/year</span>
         </h3>
 
-        <StartMessageAndBookInspection
-          propertyId={property?._id as any}
-        />
+          <StartMessageAndBookInspection
+            propertyId={property?._id as any}
+            agentEmail={property?.userId?.email as string}
+          />
       </div>
 
       <MultiImageSlider
           images={
-            property.images?.filter(
+            property?.images?.filter(
               (image): image is string => typeof image === "string"
             ) ?? []
           }

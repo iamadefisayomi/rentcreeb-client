@@ -32,6 +32,11 @@ const nextConfig: NextConfig = {
         hostname: "storage.googleapis.com",
         pathname: "/rent-house-a2c71.appspot.com/**",
       },
+    {
+        protocol: "https",
+        hostname: "ik.imagekit.io",
+        pathname: "/rentcreeb/**",
+      },
       {
         protocol: "https",
         hostname: "rentcreeb.b-cdn.net",

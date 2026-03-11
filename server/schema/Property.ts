@@ -1,7 +1,7 @@
 import { Query, Schema, Types, model, models } from 'mongoose';
 import { NewPropertySchemaType } from '@/sections/dashboard/formSchemas';
 
-export interface PropertyDocument extends Omit<NewPropertySchemaType, 'location' | 'paymentFrequency'> {
+export interface PropertyDocument extends Omit<NewPropertySchemaType, 'location' | 'paymentFrequency' | "images"> {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -10,6 +10,7 @@ export interface PropertyDocument extends Omit<NewPropertySchemaType, 'location'
   views: number | null;
   favorites?: number;
   isFeatured?: boolean;
+  images?: string[];
   priority: number | null;
   inquiries: number | null;
   location?: {
@@ -89,7 +90,7 @@ const PropertySchema = new Schema<PropertyDocument>(
       type: [String],
       required: true,
       validate: {
-        validator: (val: string[]) => val.length >= 5 && val.length <= 30,
+        validator: (val: string[]) => val.length >= 5 && val.length <= 40,
         message: 'You must provide between 5 and 30 images.',
       },
     },

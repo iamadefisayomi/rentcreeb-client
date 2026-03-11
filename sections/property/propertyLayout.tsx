@@ -49,7 +49,7 @@ export default function PropertyLayout ({ property, favourites }: { property: an
   return (
     <div className={cn("w-full bg-white rounded-2xl border gap-2")}>
         <ImageSlider
-              images={property.images.map((image: string) => (typeof image === "string" ? image : "")).filter(Boolean) || []}
+              images={property?.images?.map((image: string) => (typeof image === "string" ? image : "")).filter(Boolean) || []}
               listedIn={property?.listedIn}
               component={
                   <LoveButton

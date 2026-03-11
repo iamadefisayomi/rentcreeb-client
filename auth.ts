@@ -22,11 +22,14 @@ export const auth = betterAuth({
     sendResetPassword: async ({ user, url, token }, request) => {
       await sendEmail({
         to: user.email,
-        name: user.name,
+        template: 'generic',
+        data: {
+          link: url,
+          name: user.name,
+          message: "Click to reset your password",
+          linkDescription: "Reset Password",
+        },
         subject: "Reset your password",
-        link: url,
-        message: "Click to reset your password",
-        linkDescription: "Reset Password",
       });
     }
 },
@@ -64,11 +67,14 @@ export const auth = betterAuth({
             sendChangeEmailVerification: async ({ user, newEmail, url, token }, request) => {
               await sendEmail({
                 to: user.email, 
-                name: user.name, 
+                template: 'generic',
+                data: {
+                  name: user.name,
+                  link: url, 
+                  message: 'Please click on the link to verify your email',
+                  linkDescription: 'Confirm Email change'
+                },
                 subject: 'Change your email address', 
-                link: url, 
-                message: 'Please click on the link to verify your email',
-                linkDescription: 'Confirm Email change'
             });
             },
         }
@@ -83,11 +89,15 @@ export const auth = betterAuth({
     sendVerificationEmail: async ( { user, url, token }, request) => {
       await sendEmail({
         to: user.email, 
-        name: user.name, 
+        template: 'generic',
+        data: {
+          link: url, 
+          name: user.name, 
+          message: 'Please click on the link to verify your email',
+          linkDescription: 'Confirm Email'
+        },
         subject: 'Verify your email address', 
-        link: url, 
-        message: 'Please click on the link to verify your email',
-        linkDescription: 'Confirm Email'
+       
     });
     },
   },

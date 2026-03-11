@@ -12,13 +12,13 @@ import _ from "lodash";
 import Property from "@/server/schema/Property";
 import { slugify } from "@/utils/slugify"
 import { Types } from 'mongoose';
-import type { PipelineStage, SortOrder } from 'mongoose';
 import { dbConnection } from "@/lib/dbConnection";
 import { _properties } from "@/_data/images";
 import { SearchPropertySchemaType } from "@/sections/SearchForms/formSchemas";
 import { _myPropertySort } from "@/_data/_propertyDefault";
 
 import type { PropertyDocument } from "@/server/schema/Property";
+import mongoose from "mongoose";
 
 
 
@@ -104,10 +104,8 @@ export async function createNewProperty(payload: NewPropertySchemaType) {
     if (!getKeys.success && getKeys.message) throw new Error(getKeys.message);
     const data = getKeys.data;
 
-    console.log(data)
-
     const { title, listedIn, state, city, lga, type } = data;
-    const slug = slugify([title, type, listedIn, city, lga, state].filter(Boolean).join(" "));
+    const slug = slugify([listedIn, title, type, city, lga, state].filter(Boolean).join(" ")).toLowerCase();
 
     const existing = await Property.findOne({ userId: user.id, slug }).lean();
     if (existing) return errorMessage("You have already listed a property with this title.");
@@ -115,7 +113,7 @@ export async function createNewProperty(payload: NewPropertySchemaType) {
     // ------------------- UPLOAD IMAGES -------------------
     let uploadedImages: string[] = [];
     if (data.images?.length) {
-      const res = await uploadManyImages(data.images as File[]);
+      const res = await uploadManyImages(data.images as string[]);
       uploadedImages = res.data?.map((img: any) => img.url).filter(Boolean) ?? [];
       if (!uploadedImages.length) throw new Error("Image upload failed. Please try again.");
     }
@@ -127,14 +125,18 @@ export async function createNewProperty(payload: NewPropertySchemaType) {
       ? data.tags.split(/[\s,]+/).map((t: string) => t.trim()).filter(Boolean)
       : [];
 
+
     // ------------------- CREATE -------------------
+    const { images, ...rest } = data;
+
     const newProperty = await Property.create({
-      ...data,
+      ...rest,
       slug,
       userId: user.id,
       tags,
       images: uploadedImages,
     });
+
 
     return {
       success: true,
@@ -149,29 +151,34 @@ export async function createNewProperty(payload: NewPropertySchemaType) {
 }
 
   
+
 export async function getPropertyById(propertyId: string) {
   try {
     await dbConnection();
 
-    const isValidId = Types.ObjectId.isValid(propertyId);
+    let property;
 
-    const filter = isValidId
-      ? {
-          $or: [
-            { _id: new Types.ObjectId(propertyId) },
-            { slug: propertyId },
-          ],
-        }
-      : { slug: propertyId };
-
-    const prop = await Property.findOne(filter)
+    const isValidId = mongoose.Types.ObjectId.isValid(propertyId)
+    if (isValidId) {
+      property = await Property.findById(propertyId)
       .populate({
         path: "userId",
-        model: "User",
         select: "name email username image",
-      });
+        options: { lean: true }
+      })
+      .lean();
+    }
+    if (!property) {
+      property = await Property.findOne({slug: { $regex: `^${propertyId}$`, $options: "i" }})
+      .populate({
+        path: "userId",
+        select: "name email username image",
+        options: { lean: true }
+      })
+      .lean();
+    }
 
-    if (!prop) {
+    if (!property) {
       return {
         success: false,
         data: null,
@@ -181,8 +188,9 @@ export async function getPropertyById(propertyId: string) {
 
     return {
       success: true,
-      data: prop?.toObject(),
+      data: property,
     };
+
   } catch (err: any) {
     return errorMessage(err.message);
   }
@@ -442,3 +450,6 @@ export async function getRandomPropertyImages(limit = 5) {
     return errorMessage(err.message)
   }
 }
+
+
+

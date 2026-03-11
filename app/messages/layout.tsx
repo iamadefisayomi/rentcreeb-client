@@ -13,9 +13,13 @@ export const metadata: Metadata = {
 
 export default async function Layout ({children}: {children: ReactNode}) {
     const user = await (await getCurrentUser()).data
-    const userChats = await getUserChats(user?.id)
+    let chats = [];
+
+    if (user?.id) {
+    chats = await getUserChats(user.id);
+    }
     return (
-        <MessageLayout user={user} userChats={userChats}>
+        <MessageLayout user={user} userChats={chats}>
             {children}
         </MessageLayout>
     )

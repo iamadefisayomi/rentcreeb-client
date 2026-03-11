@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { sendMessage as sendServerMessage, markAsSeen } from '@/actions/chat';
 import MessageInput from './MessageInput';
 import { LabelSeparator } from "@/components/ui/separator";
@@ -13,7 +13,7 @@ import dayjs from "dayjs";
 import isToday from 'dayjs/plugin/isToday';
 import isYesterday from 'dayjs/plugin/isYesterday';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { MessageProps } from '@/server/schema/Message';
+import { MessageProps, SeenEntry } from '@/server/schema/Message';
 
 dayjs.extend(relativeTime);
 dayjs.extend(isToday);
@@ -22,6 +22,7 @@ dayjs.extend(isYesterday);
 type ChatUser = {
   id: string;
   name: string;
+  image?: string;
 };
 
 export default function ChatIdWindow({
@@ -31,178 +32,198 @@ export default function ChatIdWindow({
 }: {
   chatId: string;
   user: ChatUser;
-  messages: any[];
+  messages: MessageProps[];
 }) {
-  const userId = user.id;
+  const userId = user?.id;
+
   const [text, setText] = useState('');
-  const [messages, setMessages] = useState(initialMessages);
-  const [sender, setSender] = useState<any>(null);
+  const [messages, setMessages] = useState<MessageProps[]>(initialMessages);
   const [typingUser, setTypingUser] = useState<string | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
+  const {
+    sendMessage: emitSocketMessage,
+    onMessage,
+    onSeen,
+    onTyping,
+    onUserStatus,
+    joinChat,
+    sendTyping,
+    onlineUsers,
+    setOnlineUsers
+  } = useSocketStore();
 
-  const { sendMessage: emitSocketMessage, onMessage, onSeen, onTyping, joinChat, sendTyping } = useSocketStore();
+  // Determine chat partner (someone not current user)
+  const chatPartner = useMemo(() => {
+    if (!messages.length) return null;
+    const firstMsg = messages[0];
+    return firstMsg.sender._id !== userId ? firstMsg.sender : firstMsg.receiver;
+  }, [messages, userId]);
 
-useEffect(() => {
-  joinChat(chatId, userId);
+  // Socket listeners
+  useEffect(() => {
+    joinChat(chatId, userId);
+    markAsSeen(chatId, userId);
 
-  markAsSeen(chatId, userId);
+    const handleNewMessage = (msg: MessageProps) => {
+      if (msg.chatId !== chatId) return;
+      setMessages(prev => [...prev, msg]);
+      markAsSeen(chatId, userId);
+    };
 
-  const handleNewMessage = (msg: MessageProps) => {
-    if (msg.chatId === chatId) {
-      setMessages((prev) => [...prev, msg]);
-      markAsSeen(chatId, userId); // ✅ Again on new messages
-    }
-  };
-
-  const handleSeen = ({ chatId: seenChatId, userId: seenUserId }: any) => {
-    if (seenChatId === chatId) {
-      setMessages((prev) =>
-        prev.map((msg) => {
-          if (
-            msg.sender?._id !== seenUserId &&
-            !msg.seenBy?.some((s: any) => s.userId === seenUserId)
-          ) {
-            return {
-              ...msg,
-              seenBy: [...(msg.seenBy || []), { userId: seenUserId, seenAt: new Date() }],
-              status: 'seen',
-            };
+    const handleSeen = ({ chatId: seenChatId, userId: seenUserId }: any) => {
+      if (seenChatId !== chatId) return;
+      setMessages(prev =>
+        prev.map(msg => {
+          if (msg.sender?._id === userId && !msg.seenBy?.some(s => s.userId === seenUserId)) {
+            return { ...msg, seenBy: [...(msg.seenBy || []), { userId: seenUserId }], status: 'seen' } as MessageProps;
           }
           return msg;
         })
       );
-    }
-  };
+    };
 
-  const handleTyping = ({ chatId: typingId, user }: any) => {
-    if (typingId !== userId) {
-      setTypingUser(typingId);
-      setTimeout(() => setTypingUser(null), 2000);
-    }
-  };
+    const handleTyping = ({
+        chatId: typingChatId,
+        user,
+      }: {
+        chatId: string;
+        user: { id: string; name?: string };
+      }) => {
+        if (typingChatId !== chatId || user.id === userId) return;
 
-  const offMessage = onMessage(handleNewMessage);
-  const offSeen = onSeen(handleSeen);
-  const offTyping = onTyping(handleTyping);
+        setTypingUser(user.name ?? "Someone");
 
-  return () => {
-    offMessage?.();
-    offSeen?.();
-    offTyping?.();
-  };
-}, [chatId, userId]);
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
+        typingTimeoutRef.current = setTimeout(() => setTypingUser(null), 2000);
+      };
 
+    const handleUserStatus = ({
+        userId: changedUserId,
+        status,
+      }: {
+        userId: string;
+        status: "online" | "offline";
+      }) => {
+        const currentUsers = onlineUsers ?? [];
 
+        if (status === "online" && !currentUsers.includes(changedUserId)) {
+          setOnlineUsers([...currentUsers, changedUserId]);
+        }
+
+        if (status === "offline") {
+          setOnlineUsers(currentUsers.filter((id) => id !== changedUserId));
+        }
+      };
+
+    const offMessage = onMessage(handleNewMessage);
+    const offSeen = onSeen(handleSeen);
+    const offTyping = onTyping(handleTyping);
+    const offStatus = onUserStatus(handleUserStatus);
+
+    return () => {
+      offMessage?.();
+      offSeen?.();
+      offTyping?.();
+      offStatus?.();
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    };
+  }, [chatId, userId]);
+
+  // Scroll to bottom on new messages
   useEffect(() => {
-  if (messagesEndRef.current) {
-    requestAnimationFrame(() => {
-      messagesEndRef.current!.scrollIntoView({ behavior: 'smooth' });
-    });
-  }
-}, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-  useEffect(() => {
-  const other = messages.find((m) => m.sender?._id !== userId)?.sender;
-  if (other) setSender(other);
-}, [messages, userId]);
+  // Send message
+    const handleSend = async () => {
+      if (!text.trim()) return;
 
-  const handleSend = async () => {
-  if (!text.trim()) return;
-  const newMsg = (await sendServerMessage({ chatId, content: text })).message;
-  emitSocketMessage(newMsg); 
-  setText('');
-};
+      const res = await sendServerMessage({ chatId, content: text });
+      if (!res?.message) return;
 
+      const newMsg = res.message as unknown as MessageProps;
+
+      emitSocketMessage(newMsg);
+      setMessages((prev) => [...prev, newMsg]);
+      setText('');
+    };
+
+  // Emit typing
   const handleTyping = () => {
     sendTyping(chatId, user);
   };
 
+  const isOnline =
+  chatPartner?._id &&
+  onlineUsers.includes(chatPartner._id.toString());
+
   return (
-    <div className="w-full flex flex-col justify-between h-full overflow-hidden">
-      <div className="w-full flex items-center gap-2 justify-between p-2 border-b">
-          <div className="w-full flex items-center gap-1">
-            <Avatar className="w-14 h-14 border-2 border-white cursor-default">
-              <AvatarImage src={sender?.image || ""} className="object-cover w-full h-full" />
-              <AvatarFallback className="uppercase text-md font-medium text-primary">
-                {sender?.name?.slice(0, 2)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <h4 className="text-[11px] font-medium">{sender?.name}</h4>
-              <p className="text-[10px] text-muted-foreground">{typingUser ? "typing..." : "online"}</p>
-            </div>
+    <div className="w-full h-full flex flex-col">
+      {/* Header */}
+      <div className="flex-shrink-0 p-3 border-b flex items-center justify-between bg-white">
+        <div className="flex items-center gap-2">
+          <Avatar className="w-10 h-10">
+            <AvatarImage src={chatPartner?.image || ""} className="object-cover" />
+            <AvatarFallback>{chatPartner?.name?.slice(0, 2)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h4 className="text-xs font-medium">{chatPartner?.name || "User"}</h4>
+            <p className="text-[10px] text-muted-foreground">
+              {typingUser ? `${typingUser} typing...` : isOnline ? "online" : "offline"}
+            </p>
           </div>
-          <Button size='icon' variant='ghost' className='rounded-full'>
-            <Search className="w-4 text-muted-foreground" />
-          </Button>
         </div>
+        <Button size="icon" variant="ghost" className="rounded-full">
+          <Search className="w-4 text-muted-foreground" />
+        </Button>
+      </div>
 
-
-      <div className='w-full overflow-y-auto py-4 overflow-x-hidden flex-grow'>
-        {messages.map((msg: MessageProps, index: number) => {
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50">
+        {messages.map((msg, index) => {
           const currentDate = dayjs(msg.createdAt);
           const prevMsg = messages[index - 1];
           const prevDate = prevMsg ? dayjs(prevMsg.createdAt) : null;
           const shouldShowLabel = !prevDate || !currentDate.isSame(prevDate, 'day');
 
           return (
-            <div key={msg._id as string} className="w-full relative">
+            <div key={msg._id as string} className='relative'>
               {shouldShowLabel && (
-                <LabelSeparator
-                  className="text-[10px] capitalize text-muted-foreground"
-                  label={getSmartLabel(currentDate)}
-                />
+                <LabelSeparator className="text-[10px]" label={getSmartLabel(currentDate)} />
               )}
-
-              <div
-                className={cn(
-                  'p-2 flex items-start w-full gap-1',
-                  msg?.sender?._id === userId
-                    ? 'self-end flex-row-reverse mr-2'
-                    : 'ml-2'
-                )}
-              >
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src={msg.sender?.image || ""} alt={msg.sender?.name || "User"} className='w-full h-full object-cover'/>
-                  <AvatarFallback className="uppercase text-sm text-primary font-semibold">
-                    {(() => {
-                      const isCurrentUser = msg?.sender?._id?.toString() === userId?.toString();
-                      const name = isCurrentUser ? user?.name : msg?.sender?.name;
-                      return name ? name.slice(0, 2) : "NA";
-                    })()}
-                  </AvatarFallback>
+              <div className={cn('flex items-start gap-2', msg.sender?._id === userId ? 'flex-row-reverse' : '')}>
+                <Avatar className="w-7 h-7">
+                  <AvatarImage src={msg.sender?.image || ""} />
+                  <AvatarFallback>{msg.sender?.name?.slice(0, 2)}</AvatarFallback>
                 </Avatar>
-
-                <div className="flex flex-col gap-1 max-w-[90%] md:max-w-[65%]">
-                  {msg.content && (
-                    <p
-                      className={cn(
-                        "py-2 px-3 bg-slate-100 text-[11px] text-gray-800 rounded-lg  animate-fadeIn",
-                        msg.sender?._id === userId ? "rounded-tr-none" : "rounded-tl-none"
-                      )}
-                    >
-                      {msg.content}
-                    </p>
-                  )}
-
-                  <div className="flex items-center gap-1 text-[9px] text-gray-600">
-                    <p>{dayjs(msg.createdAt).format("h:mm A")}</p>
-                    {msg.sender?._id === userId && msg.status === 'seen' ? (
+                <div className="flex flex-col max-w-[70%]">
+                  <p className={cn("py-2 px-3 bg-white text-[12px] rounded-lg shadow-sm", msg.sender?._id === userId ? "rounded-tr-none bg-blue-100" : "rounded-tl-none")}>
+                    {msg.content}
+                  </p>
+                  <div className="flex items-center gap-1 text-[10px]">
+                    <span>{dayjs(msg.createdAt).format("h:mm A")}</span>
+                    {msg.sender?._id === userId && msg.status === 'seen' && (
                       <CheckCheck className="w-3 h-3 text-blue-500" />
-                    ) : msg.sender?._id === userId && msg.status === 'sent' ? (<Check className="w-3 h-3 text-muted-foreground" />) : ''}
+                    )}
+                    {msg.sender?._id === userId && msg.status === 'sent' && (
+                      <Check className="w-3 h-3 text-muted-foreground" />
+                    )}
                   </div>
                 </div>
               </div>
             </div>
           );
         })}
-
         <div ref={messagesEndRef} />
       </div>
 
-      <MessageInput onSend={handleSend} text={text} setText={setText} onTyping={handleTyping} />
+      {/* Input */}
+      <div className="flex-shrink-0 border-t bg-white">
+        <MessageInput onSend={handleSend} text={text} setText={setText} onTyping={handleTyping} />
+      </div>
     </div>
   );
 }

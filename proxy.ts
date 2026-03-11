@@ -23,6 +23,9 @@ export default async function proxy(req: NextRequest) {
   if (session && path.startsWith('/signin')) {
     return NextResponse.redirect(new URL('/', req.url));
   }
+  if (!session && path.startsWith('/messages')) {
+    return NextResponse.redirect(new URL('/signin', req.url));
+  }
 
   return NextResponse.next();
 }

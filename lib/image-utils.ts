@@ -3,8 +3,8 @@ import ImageKit from "imagekit";
 
 
 /** Converts and optionally resizes image buffer to optimized WebP */
-export async function convertToWebp(file: File): Promise<Buffer> {
-  const buffer = Buffer.from(await file.arrayBuffer());
+export async function convertToWebp(buffer: Buffer): Promise<Buffer> {
+  // const buffer = Buffer.from(await file.arrayBuffer());
   const image = sharp(buffer);
   const metadata = await image.metadata();
 

@@ -15,6 +15,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { deleteSingleImage, uploadSingleImage } from "@/actions/imagekit";
 import { authClient } from "@/auth-client";
+import { compressImage, filesToBase64 } from "@/utils/fileToBase64";
 
 
 export default function ImageUploader() {
@@ -29,7 +30,9 @@ export default function ImageUploader() {
       if (!image.success && image.message) throw new Error(image.message)
         // 
       setUploading(true)
-      const {message, success, data} = await uploadSingleImage(image.data as File)
+      const compressedFile = await compressImage(image.data as File)
+      const imageBase64 = await filesToBase64([compressedFile])
+      const {message, success, data} = await uploadSingleImage(imageBase64[0] as string)
       if (!success && message) throw new Error(message)
         //
       const {data: res, error} = await authClient.updateUser({

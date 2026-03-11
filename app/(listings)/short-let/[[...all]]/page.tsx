@@ -27,8 +27,10 @@ export default async function ShortLet ({ searchParams }: ListingsProps) {
     )
   ) as Partial<SearchPropertySchemaType>;
 
+  const newQuery = {...cleanedQuery, listenIn: 'for-rent'}
+
   const { properties } = await getProperties({
-    filters: cleanedQuery,
+    filters: newQuery,
     page,
     limit,
   });

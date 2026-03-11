@@ -28,6 +28,7 @@ import { NEXT_PUBLIC_BASE_URL } from "@/constants"
 import { createNewProperty, updateProperty } from "@/actions/properties"
 import { useParams } from "next/navigation"
 import GenerateDescription from "./GenerateDescription"
+import { compressImage, filesToBase64 } from "@/utils/fileToBase64"
 const AddPropertyMap = dynamic(() => import('@/components/AddPropertyMap'), { ssr: false });
 
 
@@ -128,33 +129,64 @@ export default function PropertyForm ({type, defaultValues}: {type: 'new' | 'edi
       }, []);
 
     // handle form submit
-    async function onSubmit (data: yup.InferType<typeof newPropertySchema>) {
-        try {
-            if (type === 'new') {
-                const res = await createNewProperty(data)
-                if (!res.success) throw new Error(res.message)
-                // 
-                setAlert(res.message, 'success')
-                form.reset()
-                return 
-            }
-            else if (type === 'edit') {
+
+        async function onSubmit(data: yup.InferType<typeof newPropertySchema>) {
+            try {
+                // Separate files and existing URLs
+                const files = (data.images || []).filter(
+                (img): img is File => img instanceof File
+                );
+
+                const urls = (data.images || []).filter(
+                (img): img is string => typeof img === "string"
+                );
+
+                // 🔥 COMPRESS IMAGES FIRST
+                const compressedFiles = await Promise.all(
+                files.map((file) => compressImage(file))
+                );
+
+                // Convert compressed files to base64
+                const base64Images = await filesToBase64(compressedFiles);
+
+                const payload = {
+                ...data,
+                images: [...urls, ...base64Images],
+                };
+
+                if (type === "new") {
+                const res = await createNewProperty(payload);
+
+                if (!res.success) {
+                    throw new Error(res.message);
+                }
+
+                setAlert(res.message || "Property created successfully", "success");
+                form.reset();
+                return;
+                }
+
+                if (type === "edit") {
                 if (!param?.id || typeof param.id !== "string") {
                     throw new Error("Invalid or missing property ID");
-                    }
-                    
-                const { success, message } = await updateProperty(param.id, data);
-                if (!success && message) throw new Error(message)
-                // 
-                setAlert(message, 'success')
-                return 
+                }
+
+                const res = await updateProperty(param.id, payload);
+
+                if (!res.success) {
+                    throw new Error(res.message);
+                }
+
+                setAlert(res.message || "Property updated successfully", "success");
+                return;
+                }
+            } catch (err: unknown) {
+                const message =
+                err instanceof Error ? err.message : "Something went wrong";
+
+                setAlert(message, "error");
             }
-            return
-        }
-        catch(err: any) {
-            return setAlert(err.message, 'error')
-        }
-    }
+            }
 
 
     return (
@@ -229,7 +261,7 @@ export default function PropertyForm ({type, defaultValues}: {type: 'new' | 'edi
                         )}
                     />
 
-                    <div className="w-full grid gap-2 grid-cols-3">
+                    <div className="w-full gap-2 flex items-center">
                         <FormField
                             control={form.control}
                             name="listedIn"
@@ -292,7 +324,8 @@ export default function PropertyForm ({type, defaultValues}: {type: 'new' | 'edi
                             )}
                         />
 
-                        <FormField
+                        { form.watch("listedIn") === "for-rent" &&
+                         <FormField
                             control={form.control}
                             name="paymentFrequency"
                             render={({ field }) => (
@@ -321,7 +354,7 @@ export default function PropertyForm ({type, defaultValues}: {type: 'new' | 'edi
                                 </FormControl>
                             </FormItem>
                             )}
-                        />
+                        />}
                     </div>
                 </div>
 

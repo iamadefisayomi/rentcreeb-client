@@ -142,3 +142,86 @@ export async function cancelSubscription() {
     return errorMessage(err.message);
   }
 }
+
+
+const INSPECTION_FEE = 20000; // ₦20,000 per inspection
+
+// Initialize inspection payment transaction
+export async function payForInspection(propertyId: string) {
+  try {
+    const { data: user, success, message } = await getCurrentUser();
+    if (!success) throw new Error(message);
+
+    if (!propertyId) throw new Error("Invalid property ID");
+
+    const payload = {
+      email: user.email,
+      amount: INSPECTION_FEE * 100, // Paystack expects amount in kobo
+      callback_url: `${NEXT_PUBLIC_BASE_URL}/api/paystack/inspection?propertyId=${propertyId}`,
+    };
+
+    const initTransaction = (await paystackAxios.post("/transaction/initialize", payload)).data;
+    if (!initTransaction.status) throw new Error(initTransaction.message);
+
+    return {
+      success: true,
+      data: initTransaction.data, // contains reference, authorization_url, etc.
+      message: "",
+    };
+  } catch (err: any) {
+    return errorMessage(err.message);
+  }
+}
+
+// Verify inspection payment
+export async function verifyInspectionPayment(reference: string, propertyId: string) {
+  try {
+    if (!reference || !propertyId) throw new Error("Invalid request parameters");
+
+    const { data: user, success, message } = await getCurrentUser();
+    if (!success) throw new Error(message);
+
+    const verifyResponse = (await paystackAxios.get(`/transaction/verify/${reference}`)).data;
+    if (!verifyResponse.status) throw new Error(verifyResponse.message);
+
+    const tx = verifyResponse.data;
+    if (tx.status !== "success") throw new Error("Transaction not successful");
+    if (tx.customer.email !== user.email) throw new Error("Invalid transaction");
+
+    return {
+      success: true,
+      data: {
+        reference,
+        amount: tx.amount / 100,
+        currency: "₦",
+        paid_at: tx.paid_at,
+        email: tx.customer.email,
+        propertyId,
+      },
+      message: "",
+    };
+  } catch (err: any) {
+    return errorMessage(err.message);
+  }
+}
+
+export async function initInspectionPayment({ propertyId, renterEmail, inspectionDate, message: renterMessage, inspectionTime }: { propertyId: string; renterEmail: string, message: string, inspectionDate: string, inspectionTime: string }) {
+  try {
+    const { data: user, success, message } = await getCurrentUser();
+    if (!success || !user) throw new Error(message);
+
+    const payload = {
+      email: renterEmail,
+      amount: 2000000,
+      callback_url: `${NEXT_PUBLIC_BASE_URL}/api/paystack/inspection/verify?propertyId=${propertyId}&message=${renterMessage}&date=${inspectionDate}&time=${inspectionTime}`
+    };
+
+    const initTransaction = (await paystackAxios.post('/transaction/initialize', payload)).data;
+
+    if (!initTransaction.status) throw new Error(initTransaction.message);
+
+    return { success: true, data: initTransaction.data, message: "" };
+  } catch (err: any) {
+    return { success: false, message: err.message, data: null };
+  }
+}

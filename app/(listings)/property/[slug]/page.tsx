@@ -3,6 +3,7 @@ import { getPropertyById } from "@/actions/properties";
 import { getReviews } from "@/actions/reviews";
 import { PropertyDocument } from "@/server/schema/Property";
 import { ReviewDocument } from "@/server/schema/Review";
+import { notFound } from "next/navigation";
 
 export const maxDuration = 60;
 
@@ -11,13 +12,14 @@ type Props = {
 };
 
 // Fetch property once and reuse
-async function fetchProperty(id: string): Promise<PropertyDocument | any> {
-  try {
-    const response = await getPropertyById(id);
-    return response?.data as PropertyDocument;
-  } catch {
-    return null;
+async function fetchProperty(id: string): Promise<PropertyDocument> {
+  const response = await getPropertyById(id);
+
+  if (!response?.success || !response.data) {
+    notFound(); 
   }
+
+  return response.data as PropertyDocument;
 }
 
 export async function generateMetadata({ params }: Props) {

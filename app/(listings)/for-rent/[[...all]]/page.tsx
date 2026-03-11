@@ -28,13 +28,14 @@ export default async function ForRent({ searchParams }: ListingsProps) {
     )
   ) as Partial<SearchPropertySchemaType>;
 
+  const newQuery = {...cleanedQuery, listenIn: 'for-rent'}
+
   const { properties } = await getProperties({
-    filters: cleanedQuery,
+    filters: newQuery,
     page,
     limit,
   });
 
-  console.log("filters client", cleanedQuery)
 
   return (
     <ClientListProperties

@@ -7,11 +7,40 @@ import { Check, CheckCheck } from 'lucide-react';
 import dayjs from 'dayjs';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSocketStore } from '@/contexts/socketStore';
 import { getCleanPath } from './_getCleanPath';
 
-// ✅ Skeleton loader for a chat item
+// -----------------------------
+// Types
+// -----------------------------
+type ChatUser = {
+  _id: string;
+  name: string;
+  image?: string;
+};
+
+type Message = {
+  _id: string;
+  chatId: string;
+  sender: ChatUser;
+  receiver: ChatUser;
+  content: string;
+  createdAt: string;
+  status: 'sent' | 'seen';
+};
+
+type Chat = {
+  _id: string;
+  participants: ChatUser[];
+  propertyId?: { _id: string; title: string };
+  lastMessage?: Message;
+  createdAt: string;
+};
+
+// -----------------------------
+// Skeleton loader
+// -----------------------------
 function ChatItemSkeleton() {
   return (
     <div className="flex gap-3 items-center justify-between p-2 w-full">
@@ -28,7 +57,9 @@ function ChatItemSkeleton() {
   );
 }
 
-// ✅ Individual chat item
+// -----------------------------
+// Chat item
+// -----------------------------
 function ChatItem({
   chat,
   currentChatId,
@@ -36,59 +67,57 @@ function ChatItem({
   onlineUsers,
   typingUser,
 }: {
-  chat: any;
+  chat: Chat;
   currentChatId: string;
   currentUserId: string;
   onlineUsers: string[];
-  typingUser: any;
+  typingUser: { id: string; name: string } | null;
 }) {
-  const otherUser = chat.participants.find((p: any) => p._id !== currentUserId);
+  const otherUser = chat.participants.find(p => p._id !== currentUserId);
+  if (!otherUser) return null;
+
   const property = chat.propertyId;
   const chatId = chat._id;
   const lastMessage = chat.lastMessage;
-  // const pathname = getCleanPath(usePathname())
-  const pathname = usePathname()
-  const url = getCleanPath(pathname)
+  const pathname = usePathname();
+  const url = getCleanPath(pathname);
 
-
+  const isOnline = onlineUsers.includes(otherUser._id);
+  const isTyping = typingUser?.id === otherUser._id;
 
   return (
-   <Link href={`${url}/${chatId}`} key={chatId}>
+    <Link href={`${url}/${chatId}`} key={chatId}>
       <div
         className={cn(
           "flex gap-3 items-center justify-between p-2 hover:bg-slate-100 rounded-lg cursor-pointer w-full overflow-hidden",
-          (currentChatId === chatId || currentChatId === property?._id) && "bg-slate-100"
+          currentChatId === chatId && "bg-slate-100"
         )}
       >
-        {/* Avatar + User Info */}
+        {/* Avatar + Online Dot */}
         <div className="flex-grow flex items-center gap-2 overflow-hidden">
           <div className="relative rounded-full shrink-0">
             <Avatar className="border-2 border-white size-14">
-              <AvatarImage src={otherUser?.image || ""} className="object-cover" />
+              <AvatarImage src={otherUser.image || ""} className="object-cover" />
               <AvatarFallback className="uppercase text-md font-medium">
-                {otherUser?.name?.slice(0, 2)}
+                {otherUser.name.slice(0, 2)}
               </AvatarFallback>
             </Avatar>
             <div
               className={cn(
                 "w-[12px] h-[12px] rounded-full absolute right-0 bottom-[2px] border-2 border-white",
-                onlineUsers.includes(otherUser?._id) ? "bg-green-500" : "bg-primary"
+                isOnline ? "bg-green-500" : "bg-gray-300"
               )}
             />
           </div>
 
-          {/* Name, Property Title, Last Message */}
-          <div className="flex flex-col min-w-0"> 
-            <h4 className="text-[11px] font-medium capitalize truncate">
-              {otherUser?.name}
-            </h4>
-            <p className="text-[10px] text-gray-600 font-semibold truncate">
-              {property?.title || ""}
-            </p>
+          {/* Name, Property Title, Last Message / Typing */}
+          <div className="flex flex-col min-w-0">
+            <h4 className="text-[11px] font-medium truncate capitalize">{otherUser.name}</h4>
+            <p className="text-[10px] text-gray-600 font-semibold truncate">{property?.title || ""}</p>
             <p className="text-[10px] text-muted-foreground truncate">
-              {typingUser?.id === otherUser._id
+              {isTyping
                 ? `${typingUser?.name.split(" ")[0]} is typing...`
-                : (lastMessage?.content || "Start chatting...")}
+                : lastMessage?.content || "Start chatting..."}
             </p>
           </div>
         </div>
@@ -98,80 +127,87 @@ function ChatItem({
           <p className="truncate max-w-[50px]">
             {dayjs(lastMessage?.createdAt || chat.createdAt).format("h:mm A")}
           </p>
-          {lastMessage?.status === "seen" ? (
-            <CheckCheck className="text-primary w-3" />
-          ) : (
-            <Check className="text-muted-foreground w-3" />
-          )}
+          {lastMessage?.sender._id === currentUserId ? (
+            lastMessage.status === "seen" ? (
+              <CheckCheck className="text-blue-500 w-3" />
+            ) : (
+              <Check className="text-muted-foreground w-3" />
+            )
+          ) : null}
         </div>
       </div>
     </Link>
-
   );
 }
 
-// ✅ Main ChatList
+// -----------------------------
+// Chat list
+// -----------------------------
 export default function ChatList({
   userChats,
   currentUserId,
   loading = false,
 }: {
-  userChats: any[];
+  userChats: Chat[];
   currentUserId: string;
   loading?: boolean;
 }) {
   const pathname = usePathname();
-  const currentChatId = pathname.split("/").pop();
+  const currentChatId = pathname.split("/").pop() || "";
 
-  const [chats, setChats] = useState(userChats);
+  const [chats, setChats] = useState<Chat[]>(userChats);
   const { onUserStatus, onlineUsers, setOnlineUsers, onMessage, typingUser } = useSocketStore();
 
-  const userSetRef = useRef(new Set<string>());
-
-  // Track online/offline status
+  // Track online/offline users
   useEffect(() => {
+    const onlineSet = new Set(onlineUsers);
+
     const unsubscribe = onUserStatus(({ userId, status }) => {
-      if (status === "online") userSetRef.current.add(userId);
-      else userSetRef.current.delete(userId);
-      setOnlineUsers(Array.from(userSetRef.current));
+      if (status === "online") onlineSet.add(userId);
+      else onlineSet.delete(userId);
+
+      setOnlineUsers(Array.from(onlineSet));
     });
 
     return () => unsubscribe();
-  }, [currentChatId]);
+  }, [onUserStatus, setOnlineUsers]);
 
   // Listen for new messages
   useEffect(() => {
-    const unsubscribe = onMessage((message) => {
-      setChats((prevChats: any[]) => {
-        const chatIndex = prevChats.findIndex(chat => chat._id === message.chatId);
-        if (chatIndex === -1) return prevChats;
+    const unsubscribe = onMessage((message: Message) => {
+      setChats(prevChats => {
+        const idx = prevChats.findIndex(chat => chat._id === message.chatId);
+        if (idx === -1) return prevChats;
 
         const updatedChats = [...prevChats];
-        const updatedChat = { ...updatedChats[chatIndex], lastMessage: message };
+        updatedChats[idx] = { ...updatedChats[idx], lastMessage: message };
 
-        updatedChats.splice(chatIndex, 1);
-        updatedChats.unshift(updatedChat);
+        // Move chat to top
+        const [chat] = updatedChats.splice(idx, 1);
+        updatedChats.unshift(chat);
 
         return updatedChats;
       });
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [onMessage]);
 
   return (
     <div className="w-full flex flex-grow flex-col gap-1 overflow-y-auto">
       {loading
         ? Array.from({ length: 5 }).map((_, i) => <ChatItemSkeleton key={i} />)
         : chats.map(chat => (
-            <ChatItem
-              key={chat._id}
-              chat={chat}
-              currentChatId={currentChatId!}
-              currentUserId={currentUserId}
-              onlineUsers={onlineUsers}
-              typingUser={typingUser}
-            />
+           <ChatItem
+            key={chat._id}
+            chat={chat}
+            currentChatId={currentChatId}
+            currentUserId={currentUserId}
+            onlineUsers={onlineUsers}
+            typingUser={
+              typingUser ? { id: typingUser.id, name: typingUser.name || "Unknown" } : null
+            }
+          />
           ))}
     </div>
   );

@@ -2,47 +2,67 @@
 
 import ShortUniqueId from "short-unique-id";
 import { errorMessage } from "@/constants";
-import { convertToWebp, getImageKit } from "@/lib/image-utils"; // renamed for clarity
+import { convertToWebp, getImageKit } from "@/lib/image-utils";
 
 const uid = new ShortUniqueId({ length: 6 });
 
-// ============ utility functions =================
-const MAX_SIZE = 3 * 1024 * 1024; // 3MB
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_SIZE = 3 * 1024 * 1024;
 
-function validateFile(file: File): void {
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    throw new Error(`Unsupported file type: ${file.type}`);
+const ALLOWED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
+
+function parseBase64(base64: string) {
+  const matches = base64.match(/^data:(.+);base64,(.+)$/);
+
+  if (!matches) {
+    throw new Error("Invalid base64 image format");
   }
-  if (file.size > MAX_SIZE) {
-    throw new Error(`File too large (max 3MB): ${file.name}`);
+
+  const mime = matches[1];
+  const data = matches[2];
+
+  if (!ALLOWED_TYPES.includes(mime)) {
+    throw new Error(`Unsupported image type: ${mime}`);
   }
+
+  const buffer = Buffer.from(data, "base64");
+
+  if (buffer.length > MAX_SIZE) {
+    throw new Error("Image exceeds 3MB limit");
+  }
+
+  return buffer;
 }
 
-function getSafeFilename(file: File): string {
-  // Always enforce .webp extension since we optimize everything
-  const baseName = uid.randomUUID();
-  return `${baseName}.webp`;
+function getSafeFilename() {
+  return `${uid.randomUUID()}.webp`;
 }
 
-// ==============================================
+
+
+
+
 
 /*
-  Uploads a single property image to ImageKit
- */
-export async function uploadSingleImage(file: File) {
+ Upload single base64 image
+*/
+export async function uploadSingleImage(base64: string) {
   try {
-    validateFile(file);
+    const buffer = parseBase64(base64);
 
-    // Convert to optimized WebP before upload
-    const webpBuffer = await convertToWebp(file);
-    const filename = getSafeFilename(file);
-    const imagekit = getImageKit()
+    const webpBuffer = await convertToWebp(buffer);
+
+    const filename = getSafeFilename();
+
+    const imagekit = getImageKit();
 
     const res = await imagekit.upload({
-      file: webpBuffer, // binary buffer
+      file: webpBuffer,
       fileName: filename,
-      useUniqueFileName: false, // we’re already generating safe unique names
+      useUniqueFileName: false,
     });
 
     return {
@@ -50,8 +70,8 @@ export async function uploadSingleImage(file: File) {
       message: "Image uploaded successfully",
       data: {
         id: res.fileId,
-        url: res.url, // optimized CDN URL
-        thumbnail: res.thumbnailUrl, // useful for grid preview
+        url: res.url,
+        thumbnail: res.thumbnailUrl,
       },
     };
   } catch (err: any) {
@@ -60,29 +80,42 @@ export async function uploadSingleImage(file: File) {
 }
 
 
-/**
- * Upload multiple property images to ImageKit
- * - Validates and optimizes each image
- * - Uploads with concurrency limit (5 workers)
- */
-export async function uploadManyImages(files: File[]) {
+
+
+
+
+
+/*
+ Upload multiple base64 images
+ Uses concurrency workers for speed
+*/
+export async function uploadManyImages(images: string[]) {
   try {
-    if (!Array.isArray(files) || files.length === 0) {
-      throw new Error("No files provided");
+    if (!Array.isArray(images) || images.length === 0) {
+      throw new Error("No images provided");
     }
 
     const concurrencyLimit = 5;
-    const results: { id?: string; url?: string; thumbnail?: string; error?: string }[] = new Array(files.length);
+
+    const results: {
+      id?: string;
+      url?: string;
+      thumbnail?: string;
+      error?: string;
+    }[] = new Array(images.length);
+
     let currentIndex = 0;
 
     async function worker() {
       while (true) {
         const index = currentIndex++;
-        if (index >= files.length) break;
 
-        const file = files[index];
+        if (index >= images.length) break;
+
+        const base64 = images[index];
+
         try {
-          const result = await uploadSingleImage(file);
+          const result = await uploadSingleImage(base64);
 
           if (result.success) {
             results[index] = result.data;
@@ -90,14 +123,15 @@ export async function uploadManyImages(files: File[]) {
             results[index] = { error: result.message };
           }
         } catch (err: any) {
-          results[index] = { error: err.message || "Unknown error" };
+          results[index] = {
+            error: err.message || "Upload failed",
+          };
         }
       }
     }
 
-    // Spawn workers
     const workers = Array.from(
-      { length: Math.min(concurrencyLimit, files.length) },
+      { length: Math.min(concurrencyLimit, images.length) },
       () => worker()
     );
 
@@ -105,23 +139,32 @@ export async function uploadManyImages(files: File[]) {
 
     return {
       success: true,
-      data: results,
       message: "Images uploaded successfully",
+      data: results,
     };
   } catch (err: any) {
     return errorMessage(err.message || "Failed to upload images");
   }
 }
 
-/**
- * Delete a single image from ImageKit by fileId
- */
+
+
+
+
+
+
+
+/*
+ Delete single image
+*/
 export async function deleteSingleImage(fileId: string) {
   try {
     if (!fileId) throw new Error("File ID is required");
-    const imagekit = getImageKit()
+
+    const imagekit = getImageKit();
 
     const res = await imagekit.deleteFile(fileId);
+
     return {
       success: true,
       message: "Image deleted successfully",
@@ -132,27 +175,42 @@ export async function deleteSingleImage(fileId: string) {
   }
 }
 
-/**
- * Delete multiple images from ImageKit
- */
+
+
+
+
+
+
+
+/*
+ Delete multiple images
+*/
 export async function deleteManyImages(fileIds: string[]) {
   try {
     if (!Array.isArray(fileIds) || fileIds.length === 0) {
       throw new Error("No file IDs provided");
     }
 
-    const results: { id?: string; success?: boolean; error?: string }[] = [];
+    const results: {
+      id?: string;
+      success?: boolean;
+      error?: string;
+    }[] = [];
 
     for (const id of fileIds) {
       try {
         const result = await deleteSingleImage(id);
+
         if (result.success) {
           results.push({ id, success: true });
         } else {
           results.push({ id, error: result.message });
         }
       } catch (err: any) {
-        results.push({ id, error: err.message || "Unknown error" });
+        results.push({
+          id,
+          error: err.message || "Delete failed",
+        });
       }
     }
 

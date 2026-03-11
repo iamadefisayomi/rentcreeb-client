@@ -26,9 +26,10 @@ export default async function ForSale({ searchParams }: ListingsProps) {
         !(Array.isArray(value) && value.length === 0)
     )
   ) as Partial<SearchPropertySchemaType>;
+  const newQuery = {...cleanedQuery, listenIn: 'for-sale'}
 
   const { properties } = await getProperties({
-    filters: cleanedQuery,
+    filters: newQuery,
     page,
     limit,
   });

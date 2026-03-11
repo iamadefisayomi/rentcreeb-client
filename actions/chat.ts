@@ -9,6 +9,9 @@ import { Types } from 'mongoose';
 import { getCurrentUser } from './auth';
 import Chat from '@/server/schema/Chat';
 import mongoose from 'mongoose';
+import { useSocketStore } from '@/contexts/socketStore';
+import { sendEmail } from './sendEmail';
+import User from '@/server/schema/User';
 
 export async function sendMessage({
   chatId,
@@ -77,6 +80,26 @@ export async function sendMessage({
 
   // 🧠 Update chat with latest message (using updateOne avoids .save issues)
   await Chat.updateOne({ _id: chat._id }, { $set: { lastMessage: messageDoc._id } });
+
+      // Fire-and-forget email if receiver offline
+  const { onlineUsers } = useSocketStore.getState();
+  if (receiverId && !onlineUsers.includes(receiverId)) {
+    const emailReciever = await User.findById(receiverId)
+    if (emailReciever) {
+          await sendEmail({
+              to: emailReciever.email,
+              subject: `New message from ${user.name}`,
+              template: "newMessage",
+              data: {
+                name:emailReciever.name,
+                link:`https://rentcreeb.com/messages/${chat._id}`,
+                message: `${user.name} sent you a new message: "${cleanContent}"`,
+                linkDescription: "View Message",
+              }
+            })
+    } 
+
+  }
 
   return {
     message: populatedMessage,
@@ -165,7 +188,7 @@ export async function markAsSeen(chatId: string, userId: string) {
 }
 
 /**
- * Return all chats for a given user (sorted by most recent).
+ * Return all chats for a given user (sorted by most recent)
  */
 export async function getUserChats(userId: string) {
   await dbConnection();
