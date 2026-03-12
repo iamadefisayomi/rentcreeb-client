@@ -14,7 +14,7 @@ import Reviews from "@/sections/reviews";
 import { PropertyDocument } from "@/server/schema/Property";
 import { ReviewDocument } from "@/server/schema/Review";
 import StartMessageAndBookInspection from "@/sections/messages/StartMessageAndBookInspection";
-
+import SimilarProperties from '@/sections/property/SimilarProperties'
 
 export default function PropertyDetails({ property, reviews }: {property?: PropertyDocument | any, reviews?: ReviewDocument[] | any}) {
   return (
@@ -41,6 +41,7 @@ export default function PropertyDetails({ property, reviews }: {property?: Prope
 
         <ImageInformation property={property} />
         <Reviews propertyId={property?._id as any} reviews={reviews as any} />
+        <SimilarProperties propertyId={property?._id} />
       </div>
     </BaseLayout>
   );

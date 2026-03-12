@@ -5,8 +5,8 @@ import { getCurrentUser } from "./auth";
 import { paystackAxios } from "@/utils/paystackAxios";
 import { revalidatePath } from "next/cache";
 import Routes from "@/Routes";
-
-
+import { dbConnection } from "@/lib/dbConnection";
+import Inspection from "@/server/schema/Inspections";
 // Get current user subscription package
 export async function getCurrentUserSubscription () {
     try {
@@ -224,4 +224,24 @@ export async function initInspectionPayment({ propertyId, renterEmail, inspectio
   } catch (err: any) {
     return { success: false, message: err.message, data: null };
   }
+}
+
+export async function validateInspectionSuccess(reference: string) {
+  await dbConnection();
+
+  const inspection = await Inspection.findOne({ reference });
+
+  if (!inspection) {
+    return { success: false };
+  }
+
+  if (inspection.viewed) {
+    return { success: false };
+  }
+
+  // mark as viewed immediately
+  inspection.viewed = true;
+  await inspection.save();
+
+  return { success: true };
 }

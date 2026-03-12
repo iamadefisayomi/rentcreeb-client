@@ -6,16 +6,19 @@ export default function GenericEmail({
   name,
   message,
   link,
+  email
 }: {
   name: string;
   message: string;
   link?: string;
+  email?: string;
 }) {
   return (
     <BaseEmail>
       <Text>{ name ? `Dear ${name}` : 'Hi !'},</Text>
 
-      <Text>{message}</Text>
+      {message && <Text>{`Message: ${message}`}</Text>}
+      {email && <Text>{`Email: ${email}`}</Text>}
 
       {link && (
         <Button

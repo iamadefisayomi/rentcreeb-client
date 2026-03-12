@@ -29,8 +29,36 @@ export default function ContactUsForm () {
     async function onSubmit(data: yup.InferType<typeof contactFormSchema>) {
         const {email, message, name, desiredDate, desiredTime} = data
         try {
-            const res = await sendEmail({to: email, message, name, subject: `Dear ${name.split(' ')[0]}, we got your message.`})
-            if (!res.success && res.message) throw new Error(res.message)
+            const [userEmailRes, supportEmailRes] = await Promise.all([
+                sendEmail({
+                    to: email,
+                    template: "generic",
+                    subject: `Dear ${name.split(" ")[0]}, we got your message.`,
+                    data: {
+                    message,
+                    name,
+                    },
+                }),
+
+                sendEmail({
+                    to: "support@rentcreeb.com",
+                    template: "generic",
+                    subject: `New message from ${name}`,
+                    data: {
+                    message,
+                    name,
+                    email,
+                    },
+                }),
+                ]);
+
+                if (!userEmailRes.success && userEmailRes.message) {
+                throw new Error(userEmailRes.message);
+                }
+
+                if (!supportEmailRes.success && supportEmailRes.message) {
+                throw new Error(supportEmailRes.message);
+                }
             setAlert('email sent', 'success')
             return form.reset({
                 email: "",

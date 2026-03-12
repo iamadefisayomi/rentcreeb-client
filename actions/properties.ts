@@ -398,10 +398,62 @@ export async function getProperties({
 }
 
 
+export async function getSimilarProperties(propertyId: string, limit = 10) {
+  await dbConnection();
 
+  /** ---------------- GET BASE PROPERTY ---------------- */
+  const base = await Property.findById(propertyId)
+    .select("type price location state city lga")
+    .lean() as any;
 
+  if (!base) {
+    return [];
+  }
 
+  /** ---------------- BUILD QUERY ---------------- */
+  const match: Record<string, any> = {
+    _id: { $ne: base._id },
+    type: base.type,
+  };
 
+  /** ---------------- PRICE RANGE ---------------- */
+  if (base.price) {
+    match.price = {
+      $gte: base.price * 0.8,
+      $lte: base.price * 1.2,
+    };
+  }
+
+  /** ---------------- LOCATION ---------------- */
+  if (base.location?.coordinates?.length === 2) {
+    match.location = {
+      $near: {
+        $geometry: {
+          type: "Point",
+          coordinates: base.location.coordinates,
+        },
+        $maxDistance: 8000,
+      },
+    };
+  } else {
+    match.$or = [
+      { state: base.state },
+      { city: base.city },
+      { lga: base.lga },
+    ];
+  }
+
+  /** ---------------- FETCH SIMILAR ---------------- */
+  const similarRaw = await Property.find(match)
+    .limit(limit)
+    .populate({
+      path: "userId",
+      select: "name email username image",
+    })
+    .lean();
+
+  return toClientSafe(similarRaw);
+}
 
 
 

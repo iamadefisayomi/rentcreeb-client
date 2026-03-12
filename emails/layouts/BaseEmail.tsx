@@ -43,8 +43,8 @@ export default function BaseEmail({
           {/* Header */}
           <Section style={header}>
             <Img
-              src="https://ik.imagekit.io/rentcreeb/RentHouse%20Logo.png"
-              // width="300"
+              src="https://ik.imagekit.io/rentcreeb/Screenshot__82_-removebg-preview.png"
+              width="300"
               // height="32"
               alt="RentCreeb"
               style={{ display: "inline-block", marginRight: 8, objectFit: 'contain' }}
@@ -55,9 +55,9 @@ export default function BaseEmail({
           {/* Hero Illustration */}
           <Section style={heroSection}>
             <Img
-              src="https://ik.imagekit.io/rentcreeb/email-image.png?updatedAt=1773101268862"
+              src="https://ik.imagekit.io/rentcreeb/email-image.png"
               alt="Hero"
-              width="350"
+              width="400"
               style={{ margin: "0 auto" }}
             />
           </Section>

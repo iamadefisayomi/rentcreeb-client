@@ -1,13 +1,15 @@
 'use client';
 
 import { BadgeCheck } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
+import {validateInspectionSuccess} from '@/actions/subscription'
 
 export default function InspectionSuccessfulPage() {
   const searchParams = useSearchParams();
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+  const router = useRouter()
 
   useEffect(() => {
     setWindowSize({ width: window.innerWidth, height: window.innerHeight });
@@ -21,27 +23,36 @@ export default function InspectionSuccessfulPage() {
     amount: searchParams.get('amount'),
     email: searchParams.get('email'),
     code: searchParams.get('code'),
-    paidAt: searchParams.get('paid_at'),
     propertyId: searchParams.get('propertyId'),
+    propertyTitle: searchParams.get('property_title'),
     date: searchParams.get('date'),
     time: searchParams.get('time'),
     location: searchParams.get('location'),
-    message: searchParams.get('message'),
     agent: searchParams.get('agent'),
   }), [searchParams]);
 
-  const formattedPaidAt = useMemo(() => {
-    if (!details.paidAt) return '';
-    const date = new Date(details.paidAt);
-    return date.toLocaleString('en-NG', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }, [details.paidAt]);
+   const [allowed, setAllowed] = useState(false);
+
+  useEffect(() => {
+    if (!details.reference) {
+      router.replace("/");
+      return;
+    }
+
+    async function check() {
+      const res = await validateInspectionSuccess(details.reference as string);
+
+      if (!res.success) {
+        router.replace("/");
+      } else {
+        setAllowed(true);
+      }
+    }
+
+    check();
+  }, [details.reference]);
+
+  if (!allowed) return null;
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center p-6 overflow-hidden">
@@ -62,14 +73,13 @@ export default function InspectionSuccessfulPage() {
         <p className="text-gray-700 text-sm text-center">Your inspection has been successfully booked. Here are the details:</p>
 
         <div className="flex flex-col gap-2 mb-4 bg-blue-100 w-full p-4 rounded-xl text-xs capitalize text-slate-700">
-          <p className="flex justify-between"><span>Property:</span> {details.propertyId}</p>
+          <p className="flex justify-between"><span>Reference:</span> {details.reference}</p>
+          <p className="flex justify-between"><span>Property:</span> {details.propertyTitle}</p>
           <p className="flex justify-between"><span>Inspection Code:</span> {details.code}{details.amount}</p>
           <p className="flex justify-between"><span>Date:</span> {details.date}</p>
           <p className="flex justify-between"><span>Time:</span> {details.time}</p>
           <p className="flex justify-between"><span>Agent:</span> {details.agent}</p>
-          <p className="flex justify-between"><span>Paid At:</span> {formattedPaidAt}</p>
           <p className="flex justify-between"><span>location:</span> {details.location}</p>
-          {details.message && <p className="flex justify-between"><span>Message:</span> {details.message}</p>}
         </div>
 
         <p className='text-gray-600 text-xs text-center'>You'll receive a reminder 24 hours before your inspection. The agent will contact you with the exact meeting point.</p>

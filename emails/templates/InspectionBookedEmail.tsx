@@ -36,7 +36,7 @@ export default function InspectionBookedEmail({
         <Text style={label}>Renter</Text>
         <Text style={value}>{renterName}</Text>
 
-        <Text style={label}>Property ID</Text>
+        <Text style={label}>Property Title</Text>
         <Text style={value}>{propertyId}</Text>
 
         <Text style={label}>Inspection Date</Text>

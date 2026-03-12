@@ -18,6 +18,7 @@ export interface InspectionDocument {
   status: 'pending' | 'confirmed' | 'cancelled';
   createdAt: Date;
   updatedAt: Date;
+  viewed: boolean;
 }
 
 const InspectionSchema = new Schema<InspectionDocument>(
@@ -34,6 +35,7 @@ const InspectionSchema = new Schema<InspectionDocument>(
     message: { type: String, trim: true, default: '' },
     verificationCode: { type: String, required: true, unique: true },
     status: { type: String, enum: ['pending', 'confirmed', 'cancelled'], default: 'pending' },
+    viewed: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -14,18 +14,19 @@ export async function sendEmail({
 }: {
   to: string;
   subject: string;
-  template: "generic" | "inspection" | "newMessage";
+  template: "generic" | "inspection" | "newMessage" | null | undefined;
   data: any;
 }) {
+  try {
+    let templateComponent;
 
-  let templateComponent;
-
-  if (template === "generic") {
+  if (!template || template === "generic") {
     templateComponent = (
       <GenericEmail
         name={data.name}
         message={data.message}
         link={data.link}
+        email={data.email}
       />
     );
   }
@@ -73,4 +74,11 @@ export async function sendEmail({
   });
 
   return { success: true };
+  }
+  catch(err: any) {
+    return ({
+      success: false,
+      message: err.message
+    })
+  }
 }
