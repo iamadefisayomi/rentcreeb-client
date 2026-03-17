@@ -47,7 +47,7 @@ export default function PropertyLayout ({ property, favourites }: { property: an
   }
 
   return (
-    <div className={cn("w-full bg-white rounded-2xl border gap-2")}>
+    <div className={cn("w-full bg-white rounded-2xl border flex flex-col")}>
         <ImageSlider
               images={property?.images?.map((image: string) => (typeof image === "string" ? image : "")).filter(Boolean) || []}
               listedIn={property?.listedIn}
@@ -59,7 +59,7 @@ export default function PropertyLayout ({ property, favourites }: { property: an
               }
           />
 
-          <div className="w-full p-4 flex flex-col gap-2">
+          <div className="w-full p-2 flex flex-col gap-3 justify-between flex-grow">
                 <h3 className="text-md text-slate-700 capitalize font-semibold tracking-tight">
                     {property?.title}
                 </h3>
@@ -68,23 +68,23 @@ export default function PropertyLayout ({ property, favourites }: { property: an
                     <MapPin className="w-4 text-muted-foreground" /> {`${property?.city} , ${property?.state}`}
                 </p>
 
-                {/* <div className={cn("w-full flex items-center justify-between gap-2")}>
-                  <span className="text-[11px] capitalize flex items-center gap-2 font-medium text-gray-700">
+                <div className={cn("w-full flex items-center justify-between gap-2")}>
+                  <span className="text-[10px] border px-2 py-1 rounded-xl capitalize flex items-center gap-2 font-medium text-gray-700">
                     <BedDouble className="w-4 text-primary" /> {property?.bedrooms} Beds
                   </span>
 
-                  <span className="h-1 w-4 bg-primary rounded-full" />
-                  <span className="text-[11px] capitalize flex items-center gap-2 font-medium text-gray-700">
+                  <span className="size-1 bg-primary rounded-full" />
+                  <span className="text-[10px] border px-2 py-1 rounded-xl capitalize flex items-center gap-2 font-medium text-gray-700">
                     <Bath className="w-4 text-primary" /> {property?.bathrooms} Baths
                   </span>
-                  <span className="h-1 w-4 bg-primary rounded-full" />
-                  <span className="text-[11px] capitalize flex items-center gap-2 font-medium text-gray-700">
+                  <span className="size-1 bg-primary rounded-full" />
+                  <span className="text-[10px] border px-2 py-1 rounded-xl capitalize flex items-center gap-2 font-medium text-gray-700">
                     <CarFront className="w-4 text-primary" />{property?.parking} parks
                   </span>
-              </div>  */}
+              </div> 
 
                 <div className="w-full flex items-center justify-between">
-                  <h3 className="text-[16px] font-medium text-primary">{currency(property?.price, { symbol: "₦", precision: 2 }).format()} <span className="text-[10px] font-medium text-muted-foreground">{property?.paymentFrequency && `/${property?.paymentFrequency}`}</span></h3>
+                  <h3 className="text-[16px] font-medium text-primary flex items-center ">{currency(property?.price, { symbol: "₦", precision: 2 }).format()} <span className="text-[10px] font-medium text-muted-foreground">{property?.paymentFrequency && `/${property?.paymentFrequency}`}</span></h3>
 
                   <PropertyAgent agent={property?.userId} />
                   
@@ -223,7 +223,7 @@ export function PropertyAgent ({agent} : AgentProps) {
     <HoverCard>
       <HoverCardTrigger asChild>
         <Button variant="link" className="text-[10px] font-medium capitalize text-muted-foreground  flex items-center gap-2">
-          <User className="size-4" /> {name && convertNameToShort(name)}
+          <User className="size-4 text-primary" /> {name && convertNameToShort(name)}
         </Button>
       </HoverCardTrigger>
       <HoverCardContent className="w-80">

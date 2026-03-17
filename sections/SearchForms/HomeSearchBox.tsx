@@ -1,187 +1,122 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import * as yup from "yup";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-} from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import {
-  propertySearchSchema,
-  SearchPropertySchemaType,
-} from "./formSchemas";
 import { yupResolver } from "@hookform/resolvers/yup";
-import useResponsive from "@/hooks/useResponsive";
-import MobileFilter from "./mobileFilter";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
+import { useRouter, useSearchParams } from "next/navigation";
+
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import DropDownComp from "@/components/DropdownComp";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { generatePriceList } from "./generatePriceList";
-import { _listedIn, _propertyTypes } from "@/_data/_propertyDefault";
-import useCookies from "@/hooks/useCookies";
+import MobileFilter from "./mobileFilter";
 import AddressAutocomplete from "../Autocomplete/AddressAutocomplete";
+import useResponsive from "@/hooks/useResponsive";
+import { propertySearchSchema, SearchPropertySchemaType } from "./formSchemas";
+import { _listedIn, _propertyTypes } from "@/_data/_propertyDefault";
+import { generatePriceList } from "./generatePriceList";
 
+// Parse URLSearchParams into usable form values
+function parseSearchParams(params: URLSearchParams): Partial<SearchPropertySchemaType> {
+  const values: Partial<SearchPropertySchemaType> = {};
 
-
-function parseSearchParams(searchParams: URLSearchParams) {
-  const values: any = {};
-
-  searchParams.forEach((value, key) => {
-    if (["min", "max", "bedrooms", "bathrooms", "garages", "parkings"].includes(key)) {
-      values[key] = Number(value);
+  params.forEach((value, key) => {
+    if (["min","max","bedrooms","bathrooms","garages","parkings"].includes(key)) {
+      values[key as keyof SearchPropertySchemaType] = Number(value) as any;
     } else {
-      values[key] = value;
+      values[key as keyof SearchPropertySchemaType] = value as any;
     }
   });
 
   return values;
 }
 
+// Build query string from form data
+function buildQuery(data: SearchPropertySchemaType) {
+  // Exclude empty fields, but include state/lga/city
+  const filtered = Object.fromEntries(
+    Object.entries(data).filter(([_, v]) => {
+      if (Array.isArray(v)) return v.length > 0;
+      return v !== "" && v !== null && v !== undefined;
+    })
+  );
+  return new URLSearchParams(filtered as Record<string,string>).toString();
+}
 
 export function HomeSearchBox() {
-
-  const isDesktop = useResponsive() === "desktop";
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  // Cookie for form state
-  const [savedFormValues, setSavedFormValues] =useState<SearchPropertySchemaType | any>();
-
-  // Sync query params into cookies on first load
-  useEffect(() => {
-    const paramsObj: Record<string, string> = {};
-    searchParams.forEach((value, key) => {
-      paramsObj[key] = value;
-    });
-
-    if (Object.keys(paramsObj).length > 0) {
-      setSavedFormValues(paramsObj as unknown as SearchPropertySchemaType);
-    }
-  }, [pathname, searchParams]);
-
-  useEffect(() => {
-    const parsed = parseSearchParams(searchParams);
-    form.reset({
-      listedIn: parsed.listedIn || _listedIn.rent,
-      ...parsed,
-    });
-  }, [searchParams]);
-
-  const form = useForm<SearchPropertySchemaType>({
-  resolver: yupResolver(propertySearchSchema),
-  defaultValues: {
-    listedIn: savedFormValues?.listedIn || _listedIn.rent,
-    type: savedFormValues?.type || "",
-    state: savedFormValues?.state || "",
-    lga: savedFormValues?.lga || "",
-    city: savedFormValues?.city || "",
-    min: savedFormValues?.min,
-    max: savedFormValues?.max,
-    amenities: savedFormValues?.amenities || [],
-    security: savedFormValues?.security || [],
-    bedrooms: savedFormValues?.bedrooms,
-    bathrooms: savedFormValues?.bathrooms,
-    garages: savedFormValues?.garages,
-    parkings: savedFormValues?.parkings,
-    location: savedFormValues?.location ?? null,
-  },
-});
-
-  // Autocomplete cookie
-  const [location, setLocation] = useCookies<any>("autocompleteLocation","",24);
-
-  // Sync autocomplete into form
-  useEffect(() => {
-  if (location) {
-    if (location.state) {
-      form.setValue("state", location.state);
-    } else {
-      form.resetField("state");
-    }
-
-    if (location.lga) {
-      form.setValue("lga", location.lga);
-    } else {
-      form.resetField("lga");
-    }
-
-    if (location.ward) {
-      form.setValue("city", location.ward);
-    } else {
-      form.resetField("city");
-    }
-
-    if (location.coordinates?.length === 2) {
-      form.setValue("location", {
-        type: "Point",
-        coordinates: location.coordinates,
-      });
-    } else {
-      form.setValue("location", null);
-    }
-  } else {
-    form.resetField("state");
-    form.resetField("lga");
-    form.resetField("city");
-    form.setValue("location", null);
-  }
-}, [location, form]);
-
-
-  const _priceList = generatePriceList();
-
-  // Persist values to cookies
-  useEffect(() => {
-    const subscription = form.watch((values) => {
-      setSavedFormValues((prev: any) => ({
-        // ...prev,
-        ...values,
-        location: values.location && values.location.coordinates?.length === 2
-          ? {
-              type: "Point",
-              coordinates: values.location.coordinates,
-            }
-          : null,
-      }));
-    });
-
-  return () => subscription.unsubscribe();
-}, [form, setSavedFormValues]);
-
+  const isDesktop = useResponsive() === "desktop";
   const [isPending, startTransition] = useTransition();
 
-  async function onSubmit(data: SearchPropertySchemaType) {
-    const filteredQuery = Object.fromEntries(
-      Object.entries(data).filter(([_, v]) => {
-        if (Array.isArray(v)) return v.length > 0;
-        if (typeof v === "object" && v?.coordinates)
-          return v.coordinates.length === 2;
-        return v !== "" && v !== null && v !== undefined;
-      })
-    );
-    const {listedIn, state, city, lga, type} = data
-    const propertyUrl = [
-    listedIn,
-    type,
-    state,
-    lga, 
-    city,
-  ].filter(Boolean).join("/").toLowerCase();
+  // Memoize URL values
+  const urlValues = useMemo(() => parseSearchParams(searchParams), [searchParams]);
 
-    const queryString = new URLSearchParams(
-      filteredQuery as Record<string, string>
-    ).toString();
+  // Form
+  const form = useForm<SearchPropertySchemaType>({
+    resolver: yupResolver(propertySearchSchema),
+    defaultValues: {
+      listedIn: urlValues.listedIn || _listedIn.rent,
+      type: "",
+      state: "",
+      lga: "",
+      city: "",
+      min: undefined,
+      max: undefined,
+      bedrooms: undefined,
+      bathrooms: undefined,
+      garages: undefined,
+      parkings: undefined,
+      ...urlValues,
+    }
+  });
+
+  // Prevent unnecessary resets
+  const lastQueryRef = useRef("");
+  useEffect(() => {
+    const currentQuery = searchParams.toString();
+    if (currentQuery === lastQueryRef.current) return;
+    lastQueryRef.current = currentQuery;
+
+    form.reset({
+      listedIn: urlValues.listedIn || _listedIn.rent,
+      type: urlValues.type || "",
+      state: urlValues.state || "",
+      lga: urlValues.lga || "",
+      city: urlValues.city || "",
+      min: urlValues.min,
+      max: urlValues.max,
+      bedrooms: urlValues.bedrooms,
+      bathrooms: urlValues.bathrooms,
+      garages: urlValues.garages,
+      parkings: urlValues.parkings
+    });
+  }, [searchParams, urlValues, form]);
+
+  const priceList = useMemo(() => generatePriceList(), []);
+
+  // Location state
+  const [location, setLocation] = useState<any>({});
+  useEffect(() => {
+    form.setValue("state", location.state || "");
+    form.setValue("lga", location.lga || "");
+    form.setValue("city", location.ward || "");
+  }, [location, form]);
+
+  // Submit handler
+  function onSubmit(data: SearchPropertySchemaType) {
+    const propertyUrl = [
+      data.listedIn,
+      data.type,
+      data.state,
+      // data.lga,
+      // data.city
+    ].filter(Boolean).join("/").toLowerCase();
+
+    const query = buildQuery(data);
 
     startTransition(() => {
-      router.push(`/${propertyUrl}?${queryString}`);
+      router.push(`/${propertyUrl}?${query}`);
     });
   }
 
@@ -191,24 +126,27 @@ export function HomeSearchBox() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="w-full flex flex-col gap-3 md:p-6 p-4 bg-white rounded-2xl max-w-5xl"
       >
-        {/* Listed In */}
+
+        {/* Listed In Toggle */}
         <FormField
           control={form.control}
           name="listedIn"
           render={({ field }) => (
-            <FormItem className="flex items-center justify-center w-full border-b border-muted text-background pb-3">
+            <FormItem className="flex items-center justify-center w-full border-b border-muted pb-3">
               <FormControl>
                 <ToggleGroup
-                  value={field.value || ''}
+                  value={field.value || ""}
                   onValueChange={field.onChange}
                   type="single"
                   className="grid grid-cols-3 w-full max-w-md"
                 >
-                  {Object.entries(_listedIn).map(([key, value], index) => (
-                    <ToggleGroupItem key={index} value={value} aria-label={key} className="hover:bg-primary text-gray-700 hover:text-white">
-                      <h3 className="text-sm capitalize font-semibold ">
-                        {key}
-                      </h3>
+                  {Object.entries(_listedIn).map(([key,value]) => (
+                    <ToggleGroupItem
+                      key={value}
+                      value={value}
+                      className="hover:bg-primary text-gray-700 hover:text-white"
+                    >
+                      <h3 className="text-sm capitalize font-semibold">{key}</h3>
                     </ToggleGroupItem>
                   ))}
                 </ToggleGroup>
@@ -217,8 +155,9 @@ export function HomeSearchBox() {
           )}
         />
 
-        {/* Property Type */}
         <div className="w-full md:grid flex flex-col md:grid-cols-7 gap-4 md:gap-2">
+
+          {/* Property Type */}
           <FormField
             control={form.control}
             name="type"
@@ -229,14 +168,14 @@ export function HomeSearchBox() {
                     title={field.value || "all"}
                     className="lowercase"
                     component={
-                      <div className="flex w-full flex-col gap-1 items-start">
-                        {Object.entries(_propertyTypes).map(([key, value], index) => (
+                      <div className="flex flex-col gap-1 items-start w-full">
+                        {Object.entries(_propertyTypes).map(([key,value]) => (
                           <Button
+                            key={value}
                             size="sm"
-                            onClick={() => field.onChange(value)}
                             variant="ghost"
-                            key={index}
-                            className="text-xs w-full flex justify-start items-center rounded-none lowercase"
+                            onClick={() => field.onChange(value)}
+                            className="text-xs w-full flex justify-start lowercase rounded-none"
                           >
                             {key}
                           </Button>
@@ -249,12 +188,12 @@ export function HomeSearchBox() {
             )}
           />
 
-          {/* Address */}
+          {/* Address Autocomplete */}
           <div className="w-full col-span-3">
             <AddressAutocomplete setLocation={setLocation} />
           </div>
 
-          {/* Price Min & Max */}
+          {/* Price Fields */}
           <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-2 col-span-3">
             <FormField
               control={form.control}
@@ -263,18 +202,16 @@ export function HomeSearchBox() {
                 <FormItem className="w-full">
                   <FormControl>
                     <DropDownComp
+                      title={priceList.find(p => p.value === Number(field.value))?.label || "min Price"}
                       className="lowercase"
-                      title={
-                        _priceList.find((p) => p.value === Number(field.value))
-                          ?.label || "min Price"
-                      }
                       component={
-                        <div className="flex w-full flex-col gap-2 items-start">
-                          {_priceList.map((price, index) => (
+                        <div className="flex flex-col gap-2 w-full">
+                          {priceList.map((price) => (
                             <Button
-                              onClick={() => field.onChange(price.value)}
+                              key={price.value}
+                              type="button"
                               variant="ghost"
-                              key={index}
+                              onClick={() => field.onChange(price.value)}
                               className="text-xs lowercase w-full"
                             >
                               {price.label}
@@ -287,8 +224,6 @@ export function HomeSearchBox() {
                 </FormItem>
               )}
             />
-
-            {/* <p className="text-background">-</p> */}
 
             <FormField
               control={form.control}
@@ -297,18 +232,16 @@ export function HomeSearchBox() {
                 <FormItem className="w-full">
                   <FormControl>
                     <DropDownComp
+                      title={priceList.find(p => p.value === Number(field.value))?.label || "max Price"}
                       className="lowercase"
-                      title={
-                        _priceList.find((p) => p.value === Number(field.value))
-                          ?.label || "max Price"
-                      }
                       component={
-                        <div className="flex w-full flex-col gap-2 items-start">
-                          {_priceList.map((price, index) => (
+                        <div className="flex flex-col gap-2 w-full">
+                          {priceList.map((price) => (
                             <Button
-                              onClick={() => field.onChange(price.value)}
+                              key={price.value}
+                              type="button"
                               variant="ghost"
-                              key={index}
+                              onClick={() => field.onChange(price.value)}
                               className="text-xs lowercase w-full"
                             >
                               {price.label}
@@ -322,11 +255,8 @@ export function HomeSearchBox() {
               )}
             />
 
-            <Button
-              type="submit"
-              loading={isPending}
-              className="px-4 hidden md:flex h-10"
-            >
+            {/* Desktop Search Button */}
+            <Button type="submit" loading={isPending} className="px-4 hidden md:flex h-10">
               Search
             </Button>
           </div>
@@ -334,13 +264,15 @@ export function HomeSearchBox() {
           {/* Mobile CTA */}
           {!isDesktop && (
             <div className="md:hidden flex items-center w-full gap-2">
-              <Button loading={isPending} className="w-full h-10">
+              <Button type="submit" loading={isPending} className="w-full h-10">
                 Search
               </Button>
               <MobileFilter />
             </div>
           )}
+
         </div>
+
       </form>
     </Form>
   );

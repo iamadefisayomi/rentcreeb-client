@@ -4,23 +4,24 @@ import { getProperties } from "@/actions/properties";
 import ClientListProperties from "@/sections/property/clientListProperties";
 import { SearchPropertySchemaType } from "@/sections/SearchForms/formSchemas";
 
-
 export const maxDuration = 60;
 
 type ListingsProps = {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function ForRent({ searchParams }: ListingsProps) {
-  const favs = await (await getUserFavourites()).data;
+  // 1. Await searchParams (Required in newer Next.js versions)
+  const resolvedParams = await searchParams;
+  
+  const favs = (await getUserFavourites()).data;
 
-  const getSearchParams = await searchParams
+  const page = Number(resolvedParams.page || 1);
+  const limit = Number(resolvedParams.limit || 20);
 
-  const page = Number(getSearchParams.page || 1);
-  const limit = Number(getSearchParams.limit || 20);
-
+  // 2. Clean the query
   const cleanedQuery = Object.fromEntries(
-    Object.entries(getSearchParams).filter(
+    Object.entries(resolvedParams).filter(
       ([_, value]) =>
         value !== undefined &&
         value !== "" &&
@@ -28,14 +29,17 @@ export default async function ForRent({ searchParams }: ListingsProps) {
     )
   ) as Partial<SearchPropertySchemaType>;
 
-  const newQuery = {...cleanedQuery, listenIn: 'for-rent'}
+  const { listedIn: _unused, ...otherFilters } = cleanedQuery;
 
-  const { properties } = await getProperties({
-    filters: newQuery,
+  // 4. Fetch properties with the hardcoded filter
+  const { properties, similarProperties, recommended } = await getProperties({
+    filters: { 
+        ...otherFilters, 
+        listedIn: 'for-rent' 
+    },
     page,
     limit,
   });
-
 
   return (
     <ClientListProperties
