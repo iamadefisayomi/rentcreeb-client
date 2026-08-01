@@ -24,8 +24,8 @@ export async function dbConnection() {
     const opts = {
       bufferCommands: false,
       maxPoolSize: 10,
-      minPoolSize: 2,
-      serverSelectionTimeoutMS: 30000,
+      minPoolSize: 1, // Reduced to 1 for hobby tier to save resources
+      serverSelectionTimeoutMS: 8000, // Fail before Vercel's 10s limit
       socketTimeoutMS: 45000,
     };
 

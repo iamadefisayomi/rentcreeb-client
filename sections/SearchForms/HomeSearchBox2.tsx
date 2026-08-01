@@ -43,7 +43,7 @@ function buildQuery(data: SearchPropertySchemaType) {
   return new URLSearchParams(filtered as Record<string,string>).toString();
 }
 
-export function HomeSearchBox() {
+export function HomeSearchBox2 () {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isDesktop = useResponsive() === "desktop";
@@ -141,7 +141,7 @@ export function HomeSearchBox() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full flex flex-col gap-3 md:p-6 p-4 bg-white rounded-2xl max-w-5xl"
+        className="w-full flex flex-col gap-3 p-2 bg-white rounded-2xl max-w-5xl"
       >
 
         {/* Listed In Toggle */}
@@ -172,7 +172,7 @@ export function HomeSearchBox() {
           )}
         />
 
-        <div className="w-full md:grid flex flex-col md:grid-cols-7 gap-4 md:gap-2">
+        <div className="w-full flex flex-col p-4 gap-4">
 
           {/* Property Type */}
           <FormField
@@ -211,7 +211,6 @@ export function HomeSearchBox() {
           </div>
 
           {/* Price Fields */}
-          <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-2 col-span-3">
             <FormField
               control={form.control}
               name="min"
@@ -276,7 +275,6 @@ export function HomeSearchBox() {
             <Button type="submit" loading={isPending} className="px-4 hidden md:flex h-10">
               Search
             </Button>
-          </div>
 
           {/* Mobile CTA */}
           {!isDesktop && (

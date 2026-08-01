@@ -4,7 +4,6 @@ import { getProperties } from "@/actions/properties";
 import ClientListProperties from "@/sections/property/clientListProperties";
 import { SearchPropertySchemaType } from "@/sections/SearchForms/formSchemas";
 
-export const maxDuration = 60;
 
 type ListingsProps = {
   searchParams: Record<string, string | string[] | undefined>;
@@ -27,7 +26,7 @@ export default async function ShortLet ({ searchParams }: ListingsProps) {
     )
   ) as Partial<SearchPropertySchemaType>;
 
-  const newQuery = {...cleanedQuery, listenIn: 'for-rent'}
+  const newQuery = {...cleanedQuery, listenIn: 'short-let'}
 
   const { properties } = await getProperties({
     filters: newQuery,

@@ -15,10 +15,10 @@ import { useAuth } from "@/hooks/useAuth";
 export const NoUser = memo(() => (
   <div className='flex items-center gap-2'>
     <Link href={Routes.login}>
-      <Button variant='outline' size='sm' className="md:w-fit w-full">Sign In</Button>
+      <Button variant='outline' size='sm' className="md:w-fit w-full px-6">Sign In</Button>
     </Link>
     <Link href={Routes.signup}>
-      <Button size='sm' className="md:w-fit w-full">Create Account</Button>
+      <Button size='sm' className="md:w-fit px-6 w-full">Sign Up</Button>
     </Link>
   </div>
   

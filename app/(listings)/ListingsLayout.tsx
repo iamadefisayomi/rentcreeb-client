@@ -36,7 +36,7 @@ export default function ListingsLayout({
         </div>
       }
     >
-      <div className={cn("w-full flex flex-col mx-auto gap-4", pageViewStyle === "list" && "max-w-7xl")}>
+      <div className={cn("w-full flex flex-col mx-auto gap-4", pageViewStyle === "list" && "max-w-8xl")}>
         {pageViewStyle === "list" && <PageViewStyleAndSort />}
 
         <div className="w-full flex-grow">

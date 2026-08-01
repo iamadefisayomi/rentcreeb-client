@@ -4,7 +4,7 @@ import CircularProgress from "@/components/CircularProgressBar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CheckCheck, IdCard, LockKeyhole, Zap } from "lucide-react"
-import VerifyModal from "./VerifyModal"
+import VerifyWithNIMC from "./VerifyWithNIMC"
 import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 
@@ -55,7 +55,7 @@ export default function Verification ({title}: {title: string, userScore: any}) 
                         <CheckCheck className="w-4 h-4 text-primary"/>
                     </Button>
                     ) : (
-                    <VerifyModal />
+                    <VerifyWithNIMC />
                     )
                 }
             </div>

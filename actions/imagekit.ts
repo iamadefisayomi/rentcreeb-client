@@ -118,7 +118,7 @@ async function addWatermark(buffer: Buffer) {
 
 
 /*
- Upload single base64 image
+ Upload
 */
 export async function uploadSingleImage(base64: string) {
   try {

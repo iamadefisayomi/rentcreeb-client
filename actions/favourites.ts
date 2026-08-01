@@ -5,6 +5,7 @@ import { getCurrentUser } from './auth';
 import { revalidatePath } from 'next/cache';
 import Routes from '@/Routes';
 import Property, { PropertyDocument } from '@/server/schema/Property';
+import { dbConnection } from '@/lib/dbConnection';
 
 
 type LeanProperty = Omit<PropertyDocument, "userId"> & {
@@ -13,6 +14,7 @@ type LeanProperty = Omit<PropertyDocument, "userId"> & {
 
 export async function addToFavourites(propertyId: string) {
   try {
+    await dbConnection()
     if (!propertyId || typeof propertyId !== 'string') {
       throw new Error('Invalid property ID');
     }
@@ -82,6 +84,7 @@ export async function addToFavourites(propertyId: string) {
 // 
 export async function getUserFavourites() {
   try {
+    await dbConnection()
     const { data: user, success, message } = await getCurrentUser();
     if (!success || !user) throw new Error(message || 'User not found');
 

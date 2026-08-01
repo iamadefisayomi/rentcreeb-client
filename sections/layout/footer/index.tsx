@@ -50,6 +50,10 @@ const Footer: React.FC = () => {
           </ul>
         </div>
       </div>
+
+      <div className="w-full flex items-center justify-center pb-4">
+        <img src="/footer-bottom.svg" alt="bottom" className="w-full" />
+      </div>
     </footer>
     
   );

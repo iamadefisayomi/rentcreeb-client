@@ -95,6 +95,32 @@ export function useAuth () {
                 return setAlert(err.message, 'error')
             }
         },
+        linkEmailPassword: async (data: { email: string; password: string }) => {
+            try {
+                const { error } = await authClient.signIn.email({
+                email: data.email,
+                password: data.password,
+                callbackURL: Routes.dashboard["account management"]["account information"],
+                })
+
+                if (error) throw new Error(error.message)
+
+                await refetchUser()
+                setAlert("Password account linked successfully", "success")
+
+            } catch (err: any) {
+                setAlert(err.message, "error")
+            }
+            },
+        unlinkAccount: async (provider: string | any) => {
+            try {
+                const { error } = await authClient.unlinkAccount({ providerId: provider })
+                if (error) throw new Error(error.message)
+                setAlert(`${provider} disconnected`, "success")
+            } catch (err: any) {
+                setAlert(err.message, "error")
+            }
+            },
         resetPasswordRequest: async (email: string) => {
             try {
                 const { data, error } = await authClient.requestPasswordReset({

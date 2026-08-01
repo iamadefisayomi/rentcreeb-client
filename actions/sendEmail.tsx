@@ -5,6 +5,7 @@ import { render } from "@react-email/render";
 import GenericEmail from "@/emails/templates/GenericEmail";
 import InspectionBookedEmail from "@/emails/templates/InspectionBookedEmail";
 import NewMessageEmail from "@/emails/templates/NewMessageEmail";
+import WaitlistJoinedEmail from "@/emails/templates/WaitlistJoinedEmail";
 
 export async function sendEmail({
   to,
@@ -14,7 +15,7 @@ export async function sendEmail({
 }: {
   to: string;
   subject: string;
-  template: "generic" | "inspection" | "newMessage" | null | undefined;
+  template: "generic" | "inspection" | "newMessage" | "waitlist" | null | undefined;
   data: any;
 }) {
   try {
@@ -30,6 +31,14 @@ export async function sendEmail({
       />
     );
   }
+
+  if (template === "waitlist") {
+  templateComponent = (
+    <WaitlistJoinedEmail
+      name={data.name}
+    />
+  );
+}
 
   if (template === "inspection") {
     templateComponent = (

@@ -10,7 +10,7 @@ import { revalidatePath } from "next/cache";
 import Routes from "@/Routes";
 import _ from "lodash";
 import Property from "@/server/schema/Property";
-import { slugify } from "@/utils/slugify"
+// import { slugify } from "@/utils/slugify"
 import { Types } from 'mongoose';
 import { dbConnection } from "@/lib/dbConnection";
 import { _properties } from "@/_data/images";
@@ -93,38 +93,114 @@ export async function updateProperty(propertyId: string, payload: Partial<NewPro
 // -------------------------
 // CREATE NEW PROPERTY
 // -------------------------
+
+import slugify from "slugify";
+import { customAlphabet } from "nanoid";
+
+const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 6);
+
+// 🔥 Slug generator (fast + unique)
+function generateSlug(data: {
+  title: string;
+  listedIn?: string;
+  type?: string;
+  city?: string;
+  lga?: string;
+  state?: string;
+}) {
+  const baseSlug = slugify(
+    [
+      data.listedIn,
+      data.title,
+      data.type,
+      data.city,
+      data.lga,
+      data.state,
+    ]
+      .filter(Boolean)
+      .join(" "),
+    { lower: true, strict: true }
+  );
+
+  return `${baseSlug}-${nanoid()}`;
+}
+
 export async function createNewProperty(payload: NewPropertySchemaType) {
   try {
     await dbConnection();
 
+    // 🔒 Auth check
     const { data: user, message, success } = await getCurrentUser();
-    if (!success || !user) throw new Error(message || "Unauthorized");
+    if (!success || !user) {
+      throw new Error(message || "Unauthorized");
+    }
 
-    const getKeys = await extractAllowedKeys<NewPropertySchemaType>(payload, newPropertyKeys);
-    if (!getKeys.success && getKeys.message) throw new Error(getKeys.message);
+    // 🔍 Extract allowed fields
+    const getKeys = await extractAllowedKeys<NewPropertySchemaType>(
+      payload,
+      newPropertyKeys
+    );
+
+    if (!getKeys.success || !getKeys.data) {
+      throw new Error(getKeys.message || "Invalid payload");
+    }
+
     const data = getKeys.data;
 
     const { title, listedIn, state, city, lga, type } = data;
-    const slug = slugify([listedIn, title, type, city, lga, state].filter(Boolean).join(" ")).toLowerCase();
 
-    const existing = await Property.findOne({ userId: user.id, slug }).lean();
-    if (existing) return errorMessage("You have already listed a property with this title.");
+    // 🛑 Required fields check
+    if (!title || !listedIn || !type) {
+      throw new Error("Missing required property fields.");
+    }
+
+    // 🚀 Generate unique slug
+    const slug = generateSlug({
+      title,
+      listedIn,
+      type,
+      city,
+      lga,
+      state,
+    });
 
     // ------------------- UPLOAD IMAGES -------------------
     let uploadedImages: string[] = [];
+
     if (data.images?.length) {
       const res = await uploadManyImages(data.images as string[]);
-      uploadedImages = res.data?.map((img: any) => img.url).filter(Boolean) ?? [];
-      if (!uploadedImages.length) throw new Error("Image upload failed. Please try again.");
+
+      if (!res.success || !res.data) {
+        throw new Error(res.message || "Image upload failed.");
+      }
+
+      uploadedImages = res.data
+        .map((img: any) => img.url)
+        .filter(Boolean);
+
+      if (!uploadedImages.length) {
+        throw new Error("Image upload failed. No valid images returned.");
+      }
     }
 
     // ------------------- NORMALIZE TAGS -------------------
-    const tags = Array.isArray(data.tags)
-      ? data.tags.map((tag: string) => tag.trim()).filter(Boolean)
-      : typeof data.tags === "string"
-      ? data.tags.split(/[\s,]+/).map((t: string) => t.trim()).filter(Boolean)
-      : [];
+    const tags = (() => {
+      if (!data.tags) return [];
 
+      const rawTags = Array.isArray(data.tags)
+        ? data.tags
+        : typeof data.tags === "string"
+        ? data.tags.split(/[\s,]+/)
+        : [];
+
+      return [
+        ...new Set(
+          rawTags
+            .map((tag: any) => String(tag).trim().toLowerCase())
+            .filter(Boolean)
+        ),
+      ];
+    })();
 
     // ------------------- CREATE -------------------
     const { images, ...rest } = data;
@@ -137,18 +213,77 @@ export async function createNewProperty(payload: NewPropertySchemaType) {
       images: uploadedImages,
     });
 
+    // ✅ Revalidate only on success
+    revalidatePath("/");
 
     return {
       success: true,
       message: "Property created successfully.",
-      data: { id: newProperty._id, slug: newProperty.slug },
+      data: {
+        id: newProperty._id,
+        slug: newProperty.slug,
+      },
     };
   } catch (err: any) {
     return errorMessage(err.message || "Failed to create property.");
-  } finally {
-    revalidatePath("/");
   }
 }
+// export async function createNewProperty(payload: NewPropertySchemaType) {
+//   try {
+//     await dbConnection();
+
+//     const { data: user, message, success } = await getCurrentUser();
+//     if (!success || !user) throw new Error(message || "Unauthorized");
+
+//     const getKeys = await extractAllowedKeys<NewPropertySchemaType>(payload, newPropertyKeys);
+//     if (!getKeys.success && getKeys.message) throw new Error(getKeys.message);
+//     const data = getKeys.data;
+
+//     const { title, listedIn, state, city, lga, type } = data;
+//     const slug = slugify([listedIn, title, type, city, lga, state].filter(Boolean).join(" ")).toLowerCase();
+
+//     const existing = await Property.findOne({ userId: user.id, slug }).lean();
+//     if (existing) return errorMessage("You have already listed a property with this title.");
+
+//     // ------------------- UPLOAD IMAGES -------------------
+//     let uploadedImages: string[] = [];
+//     if (data.images?.length) {
+//       const res = await uploadManyImages(data.images as string[]);
+//       uploadedImages = res.data?.map((img: any) => img.url).filter(Boolean) ?? [];
+//       if (!uploadedImages.length) throw new Error("Image upload failed. Please try again.");
+//     }
+
+//     // ------------------- NORMALIZE TAGS -------------------
+//     const tags = Array.isArray(data.tags)
+//       ? data.tags.map((tag: string) => tag.trim()).filter(Boolean)
+//       : typeof data.tags === "string"
+//       ? data.tags.split(/[\s,]+/).map((t: string) => t.trim()).filter(Boolean)
+//       : [];
+
+
+//     // ------------------- CREATE -------------------
+//     const { images, ...rest } = data;
+
+//     const newProperty = await Property.create({
+//       ...rest,
+//       slug,
+//       userId: user.id,
+//       tags,
+//       images: uploadedImages,
+//     });
+
+
+//     return {
+//       success: true,
+//       message: "Property created successfully.",
+//       data: { id: newProperty._id, slug: newProperty.slug },
+//     };
+//   } catch (err: any) {
+//     return errorMessage(err.message || "Failed to create property.");
+//   } finally {
+//     revalidatePath("/");
+//   }
+// }
 
   
 
@@ -460,6 +595,40 @@ export async function getSimilarProperties(propertyId: string, limit = 10) {
 
 // ------------------------------------------------
 // Get random property images
+const IMAGE_TIMEOUT = 5000;
+
+// 🔍 Validate image URL
+async function isValidImage(url: string): Promise<boolean | undefined> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), IMAGE_TIMEOUT);
+
+    // Try HEAD first
+    let res = await fetch(url, {
+      method: "HEAD",
+      signal: controller.signal,
+    });
+
+    let contentType = res.headers.get("content-type");
+
+    // بعض servers block HEAD → fallback to GET
+    if (!res.ok || !contentType) {
+      res = await fetch(url, {
+        method: "GET",
+        signal: controller.signal,
+      });
+      contentType = res.headers.get("content-type");
+    }
+
+    clearTimeout(timeout);
+
+    return res.ok && contentType?.startsWith("image/");
+  } catch {
+    return false;
+  }
+}
+
+// 🎯 MAIN FUNCTION
 export async function getRandomPropertyImages(limit = 5) {
   try {
     await dbConnection();
@@ -467,41 +636,64 @@ export async function getRandomPropertyImages(limit = 5) {
     const matchQuery = {
       isAvailable: true,
       isDeleted: false,
-      images: { $exists: true, $ne: [] }
+      images: { $exists: true, $ne: [] },
     };
 
     const properties = await Property.aggregate([
       { $match: matchQuery },
-      { $sample: { size: limit } },
-      { $project: { images: 1 } }
+      { $sample: { size: limit * 3 } }, // oversample for better success rate
+      { $project: { images: 1 } },
     ]);
 
-    let selectedImages: string[] = [];
+    const allImages: string[] = [];
 
+    // Flatten all images
     for (const property of properties) {
-      if (selectedImages.length >= limit) break;
-      const imgs = property.images;
-      if (imgs?.length) {
-        const randomImg = imgs[Math.floor(Math.random() * imgs.length)];
-        selectedImages.push(randomImg);
+      if (property.images?.length) {
+        allImages.push(...property.images);
       }
     }
 
-    if (selectedImages.length < limit) {
-      const needed = limit - selectedImages.length;
-      const fallback = _properties.slice(0, needed).map(p => p.image);
-      selectedImages = [...selectedImages, ...fallback];
+    // Shuffle images (random selection)
+    const shuffled = allImages.sort(() => 0.5 - Math.random());
+
+    const selectedImages: string[] = [];
+
+    // ⚡ Validate in parallel batches
+    for (let i = 0; i < shuffled.length && selectedImages.length < limit; i += 5) {
+      const batch = shuffled.slice(i, i + 5);
+
+      const results = await Promise.all(
+        batch.map(async (url) => ({
+          url,
+          isValid: await isValidImage(url),
+        }))
+      );
+
+      for (const res of results) {
+        if (res.isValid && selectedImages.length < limit) {
+          selectedImages.push(res.url);
+        }
+      }
     }
 
-    return ({
+    // 🔁 Fallback if still not enough
+    if (selectedImages.length < limit) {
+      const needed = limit - selectedImages.length;
+
+      const fallback = _properties
+        .map((p) => p.image)
+        .slice(0, needed);
+
+      selectedImages.push(...fallback);
+    }
+
+    return {
       success: true,
-      data: selectedImages
-    });
+      data: selectedImages,
+    };
 
   } catch (err: any) {
-    return errorMessage(err.message)
+    return errorMessage(err.message);
   }
 }
-
-
-

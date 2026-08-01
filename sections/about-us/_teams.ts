@@ -1,11 +1,11 @@
 export const _teams = [
-    // {
-    //   id: 1,
-    //   name: "Seyi Olaniyi",
-    //   role: "Brand & Communications Lead",
-    //   image: "/seyi.png",
-    //   linkedin: 'https://www.linkedin.com/in/seyi-olaniyi-220976162?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
-    // },
+    {
+      id: 1,
+      name: "Seyi Olaniyi",
+      role: "Brand & Communications Lead",
+      image: "/seyi.png",
+      linkedin: 'https://www.linkedin.com/in/seyi-olaniyi-220976162?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
+    },
     {
       id: 2,
       name: "Kazeem adebola",
@@ -13,13 +13,13 @@ export const _teams = [
       image: "/kazeem.png",
       linkedin: 'https://www.linkedin.com/in/adebola-idris-kazeem?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
     },
-    // {
-    //   id: 3,
-    //   name: "Chukwudi Julian Okpe",
-    //   role: "Quality Assurance (QA)",
-    //   image: "/chucks.png",
-    //   linkedin: 'https://www.linkedin.com/in/chukwudi-okpe-42b678171?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
-    // },
+    {
+      id: 3,
+      name: "Chukwudi Julian Okpe",
+      role: "Quality Assurance (QA)",
+      image: "/chucks.png",
+      linkedin: 'https://www.linkedin.com/in/chukwudi-okpe-42b678171?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
+    },
     {
       id: 4,
       name: "adebowale toke",
@@ -48,12 +48,12 @@ export const _teams = [
       image: "/dolapo.png",
       linkedin: 'https://www.linkedin.com/in/dolapooluwole/'
     },
-    {
-      id: 8,
-      name: "Ajimokunola Praise Olajumoke",
-      role: "UI/UX",
-      image: "/praise.png",
-      linkedin: 'https://www.linkedin.com/in/pyrie?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
-    },
+    // {
+    //   id: 8,
+    //   name: "Ajimokunola Praise Olajumoke",
+    //   role: "UI/UX",
+    //   image: "/praise.png",
+    //   linkedin: 'https://www.linkedin.com/in/pyrie?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
+    // },
   ];
   
