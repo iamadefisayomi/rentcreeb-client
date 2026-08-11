@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import CustomToast from "@/components/CustomToast";
 import SocketInitializer from "@/contexts/SocketInitializer";
 import { Analytics } from "@vercel/analytics/next"
+import WaitlistModal from "@/sections/contact-us/WaitListModal";
 
 
 const poppins = Poppins({ subsets: ["latin"], weight: ['100', '200', "300", '400', '500', '600', '700', '800', '900'] });
@@ -58,6 +59,7 @@ export default function RootLayout({
             <CustomToast />
             <SocketInitializer />
             <Analytics/>
+            <WaitlistModal />
             {children}
       </body>
     </html>

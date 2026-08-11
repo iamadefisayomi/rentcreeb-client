@@ -53,7 +53,7 @@ LGA: ${data.lga}
 
 City: ${data.city}
 
-Interest: ${data.interest}
+Interest: ${JSON.stringify(data.interest)}
 
 I Am: ${data.iAm}
 

@@ -41,9 +41,8 @@ const WaitlistSchema = new Schema(
     },
 
     interest: {
-      type: String,
-      trim: true,
-      default: "",
+      type: [String],
+      default: [],
     },
 
     iAm: {

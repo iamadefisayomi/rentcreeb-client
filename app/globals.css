@@ -217,3 +217,26 @@ input[type=date] {
   -webkit-mask-position: center;
   mask-position: center;
 }
+/* Add these to your globals.css — Tailwind's arbitrary animate-[...] values
+   reference these keyframe names directly, so they must exist somewhere
+   in your CSS (Tailwind won't generate them for you). */
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(12px, -18px) scale(1.08); }
+}
+
+@keyframes sparkle-pulse {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.2) rotate(15deg); opacity: 0.75; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

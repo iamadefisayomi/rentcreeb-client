@@ -1,0 +1,29 @@
+{
+  "title": "Cozy 2-Bedroom Apartment in Yaba",
+  "description": "Well-maintained apartment in a serene, gated estate close to tech hubs and the University of Lagos.",
+  "type": "apartment",
+  "listedIn": "rent",
+  "price": 2500000,
+  "paymentFrequency": "yearly",
+  "bedrooms": 2,
+  "bathrooms": 2,
+  "kitchens": 1,
+  "parking": 1,
+  "floorArea": 950,
+  "furnished": "furnished",
+  "city": "Yaba",
+  "state": "lagos",
+  "country": "nigeria",
+  "address": "45 Herbert Macaulay Way",
+  "ownerName": "Amaka Property Management",
+  "ownerContact": "+234 701 222 9988",
+  "images": [
+    "https://ik.imagekit.io/rentcreeb/ctIdTN.webp?updatedAt=1773738424369",
+    "https://ik.imagekit.io/rentcreeb/iC1xZp.webp?updatedAt=1773738424213",
+    "https://ik.imagekit.io/rentcreeb/P58Zd4.webp?updatedAt=1773738423930",
+    "https://ik.imagekit.io/rentcreeb/aTkAut.webp?updatedAt=1773738423862",
+    "https://ik.imagekit.io/rentcreeb/AdSHdb.webp?updatedAt=1773738426477",
+    "https://ik.imagekit.io/rentcreeb/0rGuuI.webp?updatedAt=1773738769938",
+    "https://ik.imagekit.io/rentcreeb/U717RP.webp?updatedAt=1773739302552"
+  ]
+}

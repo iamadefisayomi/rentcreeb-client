@@ -51,8 +51,8 @@ export default async function Index() {
           className="object-cover"
         />
 
-        <div className="z-10 py-8 grid grid-cols-4 gap-4 mx-auto w-full max-w-8xl">
-          <div className="col-span-3 flex flex-col items-start justify-between">
+        <div className="z-10 py-8 flex flex-col p-6 md:p-0 md:grid grid-cols-4 md:gap-4 gap-8 mx-auto w-full max-w-8xl">
+          <div className="col-span-3 flex flex-col items-start justify-between md:gap-4 gap-10">
 
             <div className="flex flex-col gap-4 ">
                 <p

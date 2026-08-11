@@ -12,7 +12,7 @@ export const contactFormSchema = yup.object({
 export const waitListFormSchema = yup.object({
     name: yup.string().required('Name is required'),
     phone: yup.string().required('Phone number is required'),
-    message: yup.string().required('Your message is required'),
+    message: yup.string().optional(),
     email: yup.string().email('Invalid email format').required('Email is required'),
     state: yup.string().trim().nullable(),
     lga: yup.string().trim().nullable(),

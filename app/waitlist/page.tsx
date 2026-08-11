@@ -32,10 +32,12 @@ export default function WaitList () {
 const WaitListInfo = () => (
   <div className="flex flex-col items-start gap-2 h-fit  w-full rounded-3xl md:max-w-sm px-3 md:p-10 py-8 bg-gradient-to-b from-[#0b1f66] to-[#0E1028]">
     <div className="flex flex-col gap-4 items-start w-full mb-3">
-        <Button className="flex items-center gap-3 text-primary p-0" variant='link'>
-          <MoveLeft className="w-2"/>
-          Back to home
-        </Button>
+        <Link href='/'>
+          <Button className="flex items-center gap-3 text-primary p-0" variant='link'>
+            <MoveLeft className="w-2"/>
+            Back to home
+          </Button>
+        </Link>
         <h1 className="text-2xl capitalize font-bold text-center text-white">Why join early?</h1>
     </div>
     

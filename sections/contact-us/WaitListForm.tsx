@@ -42,6 +42,7 @@ export default function WaitListForm () {
     const {setAlert} = useAlert()
 
     async function onSubmit(data: yup.InferType<typeof waitListFormSchema>) {
+        console.log(data)
         try {
             const response = await joinWaitlist(data);
 
@@ -54,7 +55,16 @@ export default function WaitListForm () {
             "success"
             );
 
-            form.reset();
+            form.reset({
+                name: "",
+                phone: "",
+                message: "",
+                email: "",
+                state: "",
+                lga: "",
+                city: "",
+                iAm: []
+            });
             setLocation({});
         } catch (err: any) {
             setAlert(err.message || "Something went wrong.", "error");
@@ -122,7 +132,7 @@ export default function WaitListForm () {
 
                     <FormField
                     control={form.control}
-                    name="interest"
+                    name="iAm"
                     render={({ field }) => {
                         const valueArray = field.value || [];
 
@@ -145,7 +155,7 @@ export default function WaitListForm () {
                                     type="radio"
                                     name={field.name}
                                     value={item.title}
-                                    checked={field.value === item.title}
+                                    // checked={field.value === item.title}
                                     onChange={() => field.onChange(item.title)}
                                     className="peer hidden"
                                 />
