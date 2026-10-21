@@ -34,7 +34,7 @@ export async function joinWaitlist(data: any) {
         }),
 
         sendEmail({
-            to: "support@rentcreeb.com",
+            to: "enquiry@rentcreeb.com",
             template: "generic",
             subject: `New Waitlist Signup • ${data.name}`,
             data: {

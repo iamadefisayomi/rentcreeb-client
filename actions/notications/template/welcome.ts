@@ -123,7 +123,7 @@ export default function welcomeEmail ({name, messageTitle, message}: {name: stri
 
       <hr class="seperator"/>
       <p>If you need urgent assistance, please do not hesitate to contact our support team.</p>
-      <p><a href="mailto:support@rentcreeb.com" class="button" aria-label="Contact Support via Email">Contact Support</a></p>
+      <p><a href="mailto:enquiry@rentcreeb.com" class="button" aria-label="Contact Support via Email">Contact Support</a></p>
     </div>
     <div class="footer" role="contentinfo">
       &copy; 2025 Rent House INC |  

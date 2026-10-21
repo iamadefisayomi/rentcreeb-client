@@ -41,7 +41,7 @@ export default function ContactUsForm () {
                 }),
 
                 sendEmail({
-                    to: "support@rentcreeb.com",
+                    to: "enquiry@rentcreeb.com",
                     template: "generic",
                     subject: `New message from ${name}`,
                     data: {

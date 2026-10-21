@@ -63,7 +63,8 @@ export default function WaitListForm () {
                 state: "",
                 lga: "",
                 city: "",
-                iAm: []
+                iAm: "",
+                interest: []
             });
             setLocation({});
         } catch (err: any) {
@@ -268,7 +269,7 @@ export default function WaitListForm () {
                 <Button type='submit' loading={form.formState.isSubmitting} className="w-full md:h-12">
                     {
                         form.formState.isSubmitting ? (
-                            <span className="flex items-center gap-2">Joining the waitlist <MoveRight className="size-4 animate-spin" /> </span>
+                            <span className="flex items-center gap-2">Joining the waitlist... </span>
                         ) : (
                             <span className="flex items-center gap-2">Join the waitlist <MoveRight className="size-4" /> </span>
                         )

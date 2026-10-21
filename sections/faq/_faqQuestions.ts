@@ -27,7 +27,7 @@ export const _faqQuestions = [
     {
       question: "How can I report a fraudulent listing?",
       answer:
-        "If you come across a suspicious listing, click the 'Report' button on the listing page or contact our support team at support@RentCreeb.com."
+        "If you come across a suspicious listing, click the 'Report' button on the listing page or contact our support team at enquiry@rentcreeb.com."
     },
     {
       question: "Can I edit or delete my property listing after publishing?",

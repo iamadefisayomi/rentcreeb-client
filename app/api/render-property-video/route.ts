@@ -10,7 +10,7 @@ import { getImageKit } from "@/lib/image-utils";
 import { PropertyVideoDetails } from "@/remotion/PropertyVideo";
 
 export const runtime = "nodejs";
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 const uid = new ShortUniqueId({ length: 6 });
 

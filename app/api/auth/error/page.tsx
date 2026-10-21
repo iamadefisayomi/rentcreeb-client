@@ -21,7 +21,7 @@ export default function AuthErrorPage() {
                 className="object-cover"
             />
             <p className="text-xs text-muted-foreground py-4 text-center">We encountered an issue while processing your request.<br /> Please try again in a short while or 
-            <Link href="mailto:support@rentcreeb.com" className="text-primary font-semibold capitalize"> contact us </Link> if problem persists.</p>
+            <Link href="mailto:enquiry@rentcreeb.com" className="text-primary font-semibold capitalize"> contact us </Link> if problem persists.</p>
             <Button onClick={() => router.back()} size='lg' >
                 Return to Application
             </Button>
