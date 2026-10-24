@@ -697,3 +697,37 @@ export async function getRandomPropertyImages(limit = 5) {
     return errorMessage(err.message);
   }
 }
+
+
+export async function getExploreProperties(
+  excludeIds: string[] = [],
+  limit = 4
+) {
+  try {
+    await dbConnection();
+
+    const excludedObjectIds = excludeIds
+      .filter((id) => mongoose.Types.ObjectId.isValid(id))
+      .map((id) => new mongoose.Types.ObjectId(id));
+
+    const properties = await Property.find({
+      _id: { $nin: excludedObjectIds },
+      isDeleted: { $ne: true },
+      isAvailable: true,
+    })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .populate({
+        path: "userId",
+        select: "name email username image",
+      })
+      .lean();
+
+    return {
+      success: true,
+      properties: toClientSafe(properties),
+    };
+  } catch (err: any) {
+    return errorMessage(err.message || "Failed to fetch explore properties.");
+  }
+}

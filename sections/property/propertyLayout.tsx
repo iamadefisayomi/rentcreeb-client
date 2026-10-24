@@ -1,6 +1,6 @@
 "use client"
 
-import { Bath, BedDouble, CarFront, Loader2, MapPin, User } from "lucide-react";
+import { ArrowRight, Bath, BedDouble, CarFront, Loader2, MapPin, User } from "lucide-react";
 import {
   Carousel,
   CarouselApi,
@@ -47,7 +47,7 @@ export default function PropertyLayout ({ property, favourites }: { property: an
   }
 
   return (
-    <div className={cn("w-full bg-white rounded-2xl border flex flex-col")}>
+    <div className={cn("w-full bg-white rounded-3xl flex flex-col p-2")}>
         <ImageSlider
               images={property?.images?.map((image: string) => (typeof image === "string" ? image : "")).filter(Boolean) || []}
               listedIn={property?.listedIn}
@@ -64,36 +64,50 @@ export default function PropertyLayout ({ property, favourites }: { property: an
                     {property?.title}
                 </h3>
 
-                <p className="flex items-center gap-2 text-muted-foreground text-xs font-medium capitalize">
-                    <MapPin className="w-4 text-muted-foreground" /> {`${property?.city} , ${property?.state}`}
+                <p className="flex items-center gap-2 text-muted-foreground text-xs font-medium capitalize min-w-0">
+                  <MapPin className="w-4 shrink-0 text-primary" />
+                  <span className="truncate whitespace-nowrap overflow-hidden">
+                    {`${property?.city ?? ""}, ${property?.state ?? ""}`}
+                  </span>
+                </p>
+
+                <p className="flex items-center gap-2 text-muted-foreground text-[11px] font-medium capitalize">
+                  {property?.description
+                    ? `${property.description.slice(0, 180)}${property.description.length > 180 ? "..." : ""}`
+                    : ""}
                 </p>
 
                 <div className={cn("w-full flex items-center justify-between gap-2")}>
-                  <span className="text-[10px] border px-2 py-1 rounded-xl capitalize flex items-center gap-2 font-medium text-gray-700">
+                  <span className="text-[11px]  px-2 py-1 rounded-xl capitalize flex items-center gap-2 font-medium text-gray-700">
                     <BedDouble className="w-4 text-primary" /> {property?.bedrooms} Beds
                   </span>
 
                   <span className="size-1 bg-primary rounded-full" />
-                  <span className="text-[10px] border px-2 py-1 rounded-xl capitalize flex items-center gap-2 font-medium text-gray-700">
+                  <span className="text-[11px] px-2 py-1 rounded-xl capitalize flex items-center gap-2 font-medium text-gray-700">
                     <Bath className="w-4 text-primary" /> {property?.bathrooms} Baths
                   </span>
                   <span className="size-1 bg-primary rounded-full" />
-                  <span className="text-[10px] border px-2 py-1 rounded-xl capitalize flex items-center gap-2 font-medium text-gray-700">
+                  <span className="text-[11px] px-2 py-1 rounded-xl capitalize flex items-center gap-2 font-medium text-gray-700">
                     <CarFront className="w-4 text-primary" />{property?.parking} parks
                   </span>
               </div> 
 
-                <div className="w-full flex items-center justify-between">
+                {/* <div className="w-full flex items-center justify-between">
                   <h3 className="text-[16px] font-medium text-primary flex items-center ">{currency(property?.price, { symbol: "₦", precision: 2 }).format()} <span className="text-[10px] font-medium text-muted-foreground">{property?.paymentFrequency && `/${property?.paymentFrequency}`}</span></h3>
 
                   <PropertyAgent agent={property?.userId} />
                   
-                </div>
+                </div> */}
 
-              <Button variant='ghost' onClick={handleClick} className="border-primary bg-muted border text-primary capitalize flex items-center gap-2">
-                {isPending && <Loader2 className="size-4 animate-spin duration-500" />}
-                View Details
+              
+
+              <div className="w-full flex items-center border-t pt-4 justify-between gap-2">
+                <h3 className="text-[17px] font-semibold text-slate-800 flex items-center ">{currency(property?.price, { symbol: "₦", precision: 2 }).format()} <span className="text-[10px] font-medium text-muted-foreground">{property?.paymentFrequency && `/${property?.paymentFrequency}`}</span></h3>
+
+                <Button size='icon' onClick={handleClick} className="rounded-full justify-center flex items-center">
+                {isPending ? <Loader2 className="size-4 animate-spin duration-500" /> : <ArrowRight className="size-4" />}
               </Button>
+              </div>
           </div>
     </div>
   );
@@ -135,7 +149,7 @@ export function ImageSlider({
   return (
     <Carousel
       plugins={[pluginRef.current]}
-      className="w-full relative h-64 overflow-hidden rounded-t-xl group/slider-image"
+      className="w-full relative h-56 overflow-hidden rounded-xl group/slider-image"
       onMouseEnter={() => pluginRef.current.stop()}
       onMouseLeave={() => pluginRef.current.play()}
       setApi={setApi}
@@ -144,7 +158,7 @@ export function ImageSlider({
       {/* Listed Badge */}
       {listedIn && (
         <div className="absolute top-3 right-3 z-10">
-          <span className="bg-primary p-1 rounded-2xl text-[10px] px-2 capitalize text-white">
+          <span className="bg-primary p-1 rounded-3xl text-[10px] px-2 capitalize text-white">
             {listedIn.replaceAll("-", " ")}
           </span>
         </div>
@@ -167,14 +181,14 @@ export function ImageSlider({
       {images.length === 0 ? (
         <CarouselContent>
           <CarouselItem>
-            <Skeleton className="w-full h-64 rounded-t-xl" />
+            <Skeleton className="w-full h-56 rounded-t-xl" />
           </CarouselItem>
         </CarouselContent>
       ) : (
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
-              <div className="relative w-full h-64">
+              <div className="relative w-full h-56">
                 <Image
                   src={image}
                   alt={`Property image ${index + 1}`}

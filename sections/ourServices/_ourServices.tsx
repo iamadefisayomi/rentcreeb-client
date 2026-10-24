@@ -1,4 +1,4 @@
-import { HandCoins, Headset, ShieldCheck, Users } from "lucide-react";
+import { BadgeCheck, BriefcaseBusiness, HandCoins, Headset, ShieldCheck, ShieldUser, Users,  } from "lucide-react";
 import { ReactNode } from "react";
 
 export type OurServiceProps = {
@@ -9,27 +9,27 @@ export type OurServiceProps = {
 
 export const _ourServices: OurServiceProps[] = [
   {
-    title: 'Seamless Experience',
-    icon: <ShieldCheck className="size-7 text-white" />,
+    title: 'Trust Comes First',
+    icon: <BadgeCheck className="size-6 text-primary" />,
     details:
-      'We simplify the entire renting journey — from searching for the right property to finalizing agreements — ensuring a stress-free and transparent process every step of the way.',
+      'Connect with verified renters, landlords, and agents through a platform designed to promote transparency and reduce rental risks.',
   },
   {
-    title: 'Client-Focused Approach',
-    icon: <HandCoins className="size-7 text-white" />,
+    title: 'Save Towards Rent',
+    icon: <ShieldUser className="size-6 text-primary" />,
     details:
-      'Our services are designed with tenants in mind. Every recommendation, negotiation, and interaction is centered on delivering maximum value and satisfaction to our clients.',
+      'With RentKeepa, renters can work towards their rent goals through structured savings plans designed to make preparation easier.',
   },
   {
-    title: 'Tenant Advocacy',
-    icon: <Users className="size-7 text-white" />,
+    title: 'Renting Made Simpler',
+    icon: <BriefcaseBusiness className="size-6 text-primary" />,
     details:
-      'We stand firmly on the side of tenants, ensuring fair treatment, protecting rights, and providing clear guidance in all rental matters, from agreements to dispute resolution.',
+      'Keep rental information organised, communicate more easily, and access digital rental documentation in one convenient place.',
   },
   {
-    title: 'Personalised Support',
-    icon: <Headset className="size-7 text-white" />,
+    title: 'Property Care, Connected',
+    icon: <Headset className="size-6 text-primary" />,
     details:
-      'Every tenant has unique needs, and we cater to them with tailored support — whether it’s finding properties within a budget, scheduling viewings, or assisting with documentation.',
+      'Bring landlords, renters, and artisans together to coordinate maintenance requests and keep properties in better condition.',
   },
 ];

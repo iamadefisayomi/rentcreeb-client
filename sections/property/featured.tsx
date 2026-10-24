@@ -10,11 +10,16 @@ export default function FeaturedProperties({properties}: {properties: PropertyDo
   return (
     <div className="w-full bg-muted min-h-[50vh] flex flex-col items-center justify-center px-2 py-10">
       <div className="w-full h-full max-w-8xl flex flex-col items-center">
-        <h2 className="text-2xl text-gray-700 font-semibold capitalize">
-          featured properties
-        </h2>
+        <div className="w-full flex flex-col gap-1 items-center justify-center">
+          <h4 className="text-xs uppercase text-primary">
+            Discover your next home
+          </h4>
+          <h2 className="text-2xl capitalize font-semibold text-slate-700">
+            featured properties
+          </h2>
+        </div>
 
-        <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 px-3 py-6">
+        <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-6 px-3 py-6">
           {properties?.map((property: any, idx: number) => (
             <PropertyLayout
               key={property._id.toString()}

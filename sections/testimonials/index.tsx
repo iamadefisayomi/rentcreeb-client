@@ -54,7 +54,7 @@ export default function Testimonials () {
                 Hear from our
               </h2>
               <h1 className="text-2xl md:text-3xl md:font-bold capitalize font-semibold text-center">
-                Happy Renters
+                What Our Users Say
               </h1>
             </div>
     
